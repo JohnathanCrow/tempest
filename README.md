@@ -2,12 +2,13 @@
 ![screenshot_home](https://github.com/JohnathanCrow/tempest/blob/main/screenshot.png)
 
 A metronome app with set list features, including per song double time toggle, frequency control, beat count, accents, practice speed modifiers, and notes.
+
 ## Installation
 
 #### Access
 
 - [Visit](https://johnathancrow.github.io/tempest/) and either bookmark or install via browser
-- Data is stored in locally
+- Data is stored locally
 
 
 ## Usage
