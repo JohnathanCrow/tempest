@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="theme-color" content="#050607">
+    <meta name="description" content="Offline set-list metronome for song tempos, time signatures, accents, capo positions, and notes.">
+    <title>Set Click</title>
+    <link rel="manifest" href="manifest.webmanifest">
+    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+    <link rel="apple-touch-icon" href="icons/icon-192.png">
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="app-shell">
+      <section class="stage" aria-label="Metronome">
+        <header class="song-header">
+          <div class="identity">
+            <textarea id="songName" class="song-name" rows="2" aria-label="Song name"></textarea>
+            <div class="sub-row">
+              <label>
+                <span>Capo</span>
+                <input id="capo" type="number" min="0" max="12" aria-label="Capo position">
+              </label>
+              <label>
+                <span>Tempo</span>
+                <input id="tempoInput" type="number" min="1" max="300" aria-label="Tempo">
+              </label>
+              <button id="tapTempo" class="plain-button" type="button">Tap Tempo</button>
+              <label>
+                <span>Beats</span>
+                <input id="beatsPerBar" type="number" min="1" max="24" aria-label="Beats per bar">
+              </label>
+              <label>
+                <span>Value</span>
+                <input id="beatValue" type="number" min="1" max="64" aria-label="Beat value">
+              </label>
+              <button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double Time</button>
+            </div>
+          </div>
+        </header>
+
+        <section class="tempo-stack" aria-label="Tempo controls">
+          <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
+          <section class="tempo-readout">
+            <div id="effectiveLabel" class="effective-label">Stored tempo</div>
+            <div id="tempoValue" class="tempo-value">74</div>
+          </section>
+
+          <section class="transport">
+            <button id="previousSong" type="button" aria-label="Previous song">◀◀</button>
+            <button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
+            <button id="nextSong" type="button" aria-label="Next song">▶▶</button>
+          </section>
+
+          <section class="practice-speed" aria-label="Temporary tempo adjustment">
+            <button data-speed="-25" type="button">-25%</button>
+            <button data-speed="-20" type="button">-20%</button>
+            <button data-speed="-15" type="button">-15%</button>
+            <button data-speed="-10" type="button">-10%</button>
+            <button data-speed="-5" type="button">-5%</button>
+            <button data-speed="0" type="button">0</button>
+            <button data-speed="5" type="button">+5%</button>
+            <button data-speed="10" type="button">+10%</button>
+            <button data-speed="15" type="button">+15%</button>
+            <button data-speed="20" type="button">+20%</button>
+            <button data-speed="25" type="button">+25%</button>
+          </section>
+        </section>
+
+        <section class="notes-panel">
+          <label for="notes">Notes</label>
+          <textarea id="notes" rows="4" placeholder="Arrangement notes, cues, endings..."></textarea>
+        </section>
+      </section>
+
+      <aside class="set-list" aria-label="Set list">
+        <div class="set-actions">
+          <button id="addSong" class="add-button" type="button" aria-label="Add song">+</button>
+          <button id="addDivider" class="divider-button" type="button" aria-label="Add divider">-</button>
+          <button id="importSongs" type="button">Import</button>
+          <button id="exportSongs" type="button">Export</button>
+          <button id="clearSongs" type="button">Clear</button>
+          <input id="importFile" type="file" accept="application/json" hidden>
+        </div>
+        <div class="sort-actions">
+          <button data-sort="custom" type="button">Custom</button>
+          <button data-sort="name" type="button">A-Z</button>
+          <button data-sort="tempo" type="button">BPM</button>
+          <button data-sort="capo" type="button">Capo</button>
+        </div>
+        <div id="songsList" class="songs"></div>
+      </aside>
+    </main>
+
+    <script src="app.js"></script>
+  </body>
+</html>

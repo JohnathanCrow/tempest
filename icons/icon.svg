@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-label="Set Click icon">
+  <rect width="512" height="512" rx="96" fill="#050607"/>
+  <circle cx="256" cy="256" r="182" fill="#101112" stroke="#58a8ff" stroke-width="18"/>
+  <path d="M256 116v142l92 84" fill="none" stroke="#f4f4f2" stroke-width="30" stroke-linecap="round" stroke-linejoin="round"/>
+  <circle cx="256" cy="256" r="26" fill="#58a8ff"/>
+  <path d="M144 372h224" stroke="#58a8ff" stroke-width="22" stroke-linecap="round"/>
+</svg>
