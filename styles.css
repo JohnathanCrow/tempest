@@ -107,14 +107,14 @@ button {
 
 .song-name {
   width: 100%;
-  min-height: 1.2em;
+  min-height: 2.5em;
   max-height: 2.5em;
   resize: none;
   overflow: auto;
   border: 0;
   background: transparent;
   color: var(--text);
-  font-size: clamp(1.85rem, 2.5vw, 3rem);
+  font-size: clamp(1.85rem, 2.5vw, 2rem);
   line-height: 1.04;
   font-weight: 650;
   letter-spacing: 0;
@@ -354,14 +354,14 @@ textarea:disabled {
 .sort-actions button {
   min-width: 0;
   padding: 0 10px;
-  font-size: .78rem;
+  font-size: 1.00rem;
 }
 
 .set-actions .add-button {
   background: var(--blue);
   border-color: var(--blue);
   color: #03111f;
-  font-size: 1.45rem;
+  font-size: 1.00rem;
   font-weight: 800;
 }
 
