@@ -6,7 +6,7 @@ A metronome app with set list features, including per song double time toggle, f
 
 #### Access
 
-- [Visit](https://github.com/JohnathanCrow/fabularasa/releases) and either bookmark or install via browser
+- [Visit](https://johnathancrow.github.io/tempest/) and either bookmark or install via browser
 - Data is stored in locally
 
 
