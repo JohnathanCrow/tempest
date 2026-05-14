@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="theme-color" content="#050607">
-    <meta name="description" content="Set-list metronome with time signatures, accents, capo positions, sorting, dividers, export/import and notes.">
+    <meta name="description" content="Offline set-list metronome for song tempos, time signatures, accents, capo positions, and notes.">
     <title>Tempest</title>
     <link rel="manifest" href="manifest.webmanifest">
     <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
@@ -14,19 +14,36 @@
   <body>
     <main class="app-shell">
       <section class="stage" aria-label="Metronome">
-        <header class="song-header">
-          <div class="identity">
-            <textarea id="songName" class="song-name" rows="2" aria-label="Song name"></textarea>
-            <div class="sub-row">
+        <section class="sticky-console">
+          <header class="song-header">
+            <textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="New Song"></textarea>
+          </header>
+
+          <section class="live-grid" aria-label="Live metronome controls">
+            <section class="tempo-column">
+              <section class="tempo-readout">
+                <div id="effectiveLabel" class="effective-label">Stored tempo</div>
+                <div id="tempoValue" class="tempo-value">74</div>
+              </section>
+            </section>
+
+            <section class="settings-grid">
               <label>
                 <span>Capo</span>
                 <input id="capo" type="number" min="0" max="12" aria-label="Capo position">
               </label>
               <label>
                 <span>Tempo</span>
-                <input id="tempoInput" type="number" min="1" max="300" aria-label="Tempo">
+                <input id="tempoInput" type="number" min="1" max="400" aria-label="Tempo">
               </label>
-              <button id="tapTempo" class="plain-button" type="button">Tap Tempo</button>
+              <label>
+                <span>Freq</span>
+                <input id="beatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
+              </label>
+              <div class="settings-actions">
+                <span>Settings</span>
+                <button id="tapTempo" class="plain-button" type="button">Tap Tempo</button>
+              </div>
               <label>
                 <span>Beats</span>
                 <input id="beatsPerBar" type="number" min="1" max="24" aria-label="Beats per bar">
@@ -35,16 +52,15 @@
                 <span>Value</span>
                 <input id="beatValue" type="number" min="1" max="64" aria-label="Beat value">
               </label>
-              <button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double Time</button>
-            </div>
-          </div>
-        </header>
-
-        <section class="tempo-stack" aria-label="Tempo controls">
-          <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
-          <section class="tempo-readout">
-            <div id="effectiveLabel" class="effective-label">Stored tempo</div>
-            <div id="tempoValue" class="tempo-value">74</div>
+              <label>
+                <span>Acc</span>
+                <input id="accentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
+              </label>
+              <div class="settings-actions">
+                <span aria-hidden="true">&nbsp;</span>
+                <button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double Time</button>
+              </div>
+            </section>
           </section>
 
           <section class="transport">
@@ -52,6 +68,8 @@
             <button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
             <button id="nextSong" type="button" aria-label="Next song">▶▶</button>
           </section>
+
+          <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
 
           <section class="practice-speed" aria-label="Temporary tempo adjustment">
             <button data-speed="-25" type="button">-25%</button>
@@ -66,12 +84,13 @@
             <button data-speed="20" type="button">+20%</button>
             <button data-speed="25" type="button">+25%</button>
           </section>
-        </section>
 
-        <section class="notes-panel">
-          <label for="notes">Notes</label>
-          <textarea id="notes" rows="4" placeholder="Arrangement notes, cues, endings..."></textarea>
+          <section class="notes-panel">
+            <label for="notes">Notes</label>
+            <textarea id="notes" rows="12" placeholder="..."></textarea>
+          </section>
         </section>
+        <div class="stage-spacer" aria-hidden="true"></div>
       </section>
 
       <aside class="set-list" aria-label="Set list">

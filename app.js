@@ -8,7 +8,11 @@ let sortedViewIds = [];
 let tempSpeed = 0;
 let isPlaying = false;
 let currentBeat = -1;
-let timerId = null;
+let schedulerId = null;
+let nextClickTime = 0;
+let nextBeatIndex = 0;
+const SCHEDULE_AHEAD_SECONDS = 0.12;
+const SCHEDULER_INTERVAL_MS = 25;
 let audioContext = null;
 let tapTimes = [];
 let draggedItemId = null;
@@ -17,6 +21,8 @@ const els = {
   songName: document.querySelector("#songName"),
   capo: document.querySelector("#capo"),
   tempoInput: document.querySelector("#tempoInput"),
+  beatFrequency: document.querySelector("#beatFrequency"),
+  accentFrequency: document.querySelector("#accentFrequency"),
   beatsPerBar: document.querySelector("#beatsPerBar"),
   beatValue: document.querySelector("#beatValue"),
   doubleTime: document.querySelector("#doubleTime"),
@@ -53,7 +59,9 @@ function normalizeState(raw) {
   const songs = (raw.songs || []).map((song) => ({
     id: song.id || crypto.randomUUID(),
     name: song.name || "Untitled Song",
-    tempo: clamp(parseInt(song.tempo, 10) || 80, 1, 300),
+    tempo: clamp(parseInt(song.tempo, 10) || 100, 1, 400),
+    beatFrequency: clamp(parseInt(song.beatFrequency, 10) || 1000, 1, 4000),
+    accentFrequency: clamp(parseInt(song.accentFrequency, 10) || 800, 1, 4000),
     capo: clamp(parseInt(song.capo, 10) || 0, 0, 12),
     notes: song.notes || "",
     beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
@@ -117,6 +125,8 @@ function render() {
   resizeSongName();
   els.capo.value = song.capo;
   els.tempoInput.value = song.tempo;
+  els.beatFrequency.value = song.beatFrequency;
+  els.accentFrequency.value = song.accentFrequency;
   els.beatsPerBar.value = song.beatsPerBar;
   els.beatValue.value = song.beatValue;
   els.doubleTime.classList.toggle("active", song.doubleTime);
@@ -137,6 +147,8 @@ function renderEmptyState() {
   resizeSongName();
   els.capo.value = "";
   els.tempoInput.value = "";
+  els.beatFrequency.value = "";
+  els.accentFrequency.value = "";
   els.beatsPerBar.value = "";
   els.beatValue.value = "4";
   els.doubleTime.classList.remove("active");
@@ -155,6 +167,8 @@ function setEditorDisabled(disabled) {
     els.songName,
     els.capo,
     els.tempoInput,
+    els.beatFrequency,
+    els.accentFrequency,
     els.beatsPerBar,
     els.beatValue,
     els.doubleTime,
@@ -316,7 +330,7 @@ function updateSong(patch) {
   if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
     sortedViewIds = sortedSongIds(sortMode);
   }
-  if ("tempo" in patch && isPlaying) restartClock();
+  if (("tempo" in patch || "beatFrequency" in patch || "accentFrequency" in patch || "beatsPerBar" in patch) && isPlaying) restartClock();
   if ("doubleTime" in patch && isPlaying) restartClock();
   render();
 }
@@ -341,47 +355,71 @@ function toggleAccent(beat) {
   render();
 }
 
-function playClick(accented) {
+function ensureAudioContext() {
   audioContext ||= new AudioContext();
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
-  oscillator.frequency.value = accented ? 1350 : 870;
-  oscillator.type = "sine";
-  gain.gain.setValueAtTime(accented ? 0.45 : 0.25, audioContext.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.055);
-  oscillator.connect(gain).connect(audioContext.destination);
-  oscillator.start();
-  oscillator.stop(audioContext.currentTime + 0.06);
+  return audioContext;
 }
 
-function tick() {
+function playClick(accented, time = ensureAudioContext().currentTime, song = selectedSong()) {
+  const context = ensureAudioContext();
+  const oscillator = audioContext.createOscillator();
+  const gain = audioContext.createGain();
+  oscillator.frequency.value = accented ? song.accentFrequency : song.beatFrequency;
+  oscillator.type = "sine";
+  gain.gain.setValueAtTime(accented ? 0.45 : 0.25, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
+  oscillator.connect(gain).connect(context.destination);
+  oscillator.start(time);
+  oscillator.stop(time + 0.06);
+}
+
+function scheduleBeat(beatIndex, time) {
   const song = selectedSong();
   if (!song) return;
-  currentBeat = (currentBeat + 1) % song.beatsPerBar;
-  playClick(song.accents.includes(currentBeat));
-  renderBeats(song);
+  playClick(song.accents.includes(beatIndex), time, song);
+  window.setTimeout(() => {
+    if (!isPlaying || selectedSong()?.id !== song.id) return;
+    currentBeat = beatIndex;
+    renderBeats(song);
+  }, Math.max(0, (time - ensureAudioContext().currentTime) * 1000));
+}
+
+function schedulerTick() {
+  const song = selectedSong();
+  if (!song || !audioContext) return;
+  while (nextClickTime < audioContext.currentTime + SCHEDULE_AHEAD_SECONDS) {
+    scheduleBeat(nextBeatIndex, nextClickTime);
+    nextBeatIndex = (nextBeatIndex + 1) % song.beatsPerBar;
+    nextClickTime += 60 / effectiveTempo(song);
+  }
 }
 
 function startClock() {
   if (!selectedSong()) return;
+  ensureAudioContext();
+  if (audioContext.state === "suspended") {
+    audioContext.resume();
+  }
   isPlaying = true;
-  currentBeat = -1;
-  tick();
-  timerId = setInterval(tick, 60000 / effectiveTempo());
+  currentBeat = 0;
+  nextBeatIndex = 0;
+  nextClickTime = audioContext.currentTime + 0.035;
+  schedulerTick();
+  schedulerId = window.setInterval(schedulerTick, SCHEDULER_INTERVAL_MS);
   render();
 }
 
 function stopClock() {
   isPlaying = false;
-  clearInterval(timerId);
-  timerId = null;
+  clearInterval(schedulerId);
+  schedulerId = null;
   currentBeat = -1;
   render();
 }
 
 function restartClock() {
-  clearInterval(timerId);
-  timerId = null;
+  clearInterval(schedulerId);
+  schedulerId = null;
   if (isPlaying) startClock();
 }
 
@@ -444,14 +482,16 @@ function sortSongs(mode) {
 function addSong() {
   const song = {
     id: crypto.randomUUID(),
-    name: "New Song",
-    tempo: 80,
+    name: "",
+    tempo: 100,
+    beatFrequency: 1000,
+    accentFrequency: 800,
     capo: 0,
     notes: "",
     beatsPerBar: 4,
     beatValue: 4,
     doubleTime: false,
-    accents: [0]
+    accents: []
   };
   state.songs.push(song);
   state.items.push({ type: "song", id: song.id, songId: song.id });
@@ -518,6 +558,24 @@ els.tempoInput.addEventListener("input", (event) => {
   if (!Number.isFinite(tempo) || tempo < 1) return;
   updateSong({ tempo: clamp(tempo, 1, 300) });
 });
+els.beatFrequency.addEventListener("input", (event) => {
+  if (event.target.value === "") return;
+  const frequency = parseInt(event.target.value, 10);
+  if (!Number.isFinite(frequency)) return;
+  updateSong({ beatFrequency: clamp(frequency, 1, 4000) });
+});
+els.beatFrequency.addEventListener("blur", () => {
+  updateSong({ beatFrequency: clamp(parseInt(els.beatFrequency.value, 10) || 1000, 1, 4000) });
+});
+els.accentFrequency.addEventListener("input", (event) => {
+  if (event.target.value === "") return;
+  const frequency = parseInt(event.target.value, 10);
+  if (!Number.isFinite(frequency)) return;
+  updateSong({ accentFrequency: clamp(frequency, 1, 4000) });
+});
+els.accentFrequency.addEventListener("blur", () => {
+  updateSong({ accentFrequency: clamp(parseInt(els.accentFrequency.value, 10) || 800, 1, 4000) });
+});
 els.tempoInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -559,7 +617,7 @@ els.tapTempo.addEventListener("click", () => {
   if (tapTimes.length >= 2) {
     const intervals = tapTimes.slice(1).map((time, index) => time - tapTimes[index]);
     const average = intervals.reduce((sum, item) => sum + item, 0) / intervals.length;
-    updateSong({ tempo: clamp(Math.round(60000 / average), 1, 300) });
+    updateSong({ tempo: clamp(Math.round(60000 / average), 1, 400) });
   }
 });
 document.querySelectorAll("[data-speed]").forEach((button) => {
@@ -593,7 +651,7 @@ document.querySelectorAll("[data-sort]").forEach((button) => {
 });
 
 function commitTempoInput() {
-  const tempo = clamp(parseInt(els.tempoInput.value, 10) || 1, 1, 300);
+  const tempo = clamp(parseInt(els.tempoInput.value, 10) || 1, 1, 400);
   updateSong({ tempo });
 }
 
