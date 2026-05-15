@@ -29,49 +29,49 @@
 
             <section class="settings-grid">
               <label>
-                <span>Capo</span>
-                <input id="capo" type="number" min="0" max="12" aria-label="Capo position">
-              </label>
-              <label>
                 <span>Tempo</span>
                 <input id="tempoInput" type="number" min="1" max="400" aria-label="Tempo">
+              </label>
+              <label>
+                <span>Capo</span>
+                <input id="capo" type="number" min="0" max="16" aria-label="Capo position">
               </label>
               <label>
                 <span>Freq</span>
                 <input id="beatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
               </label>
+			  <label>
+			    <span>Sub</span>
+			    <input id="subdivision" type="number" min="1" max="16" aria-label="Subdivision">
+			  </label>			  
               <div class="settings-actions">
                 <span>Settings</span>
                 <button id="tapTempo" class="plain-button" type="button">Tap</button>
               </div>
               <label>
                 <span>Beats</span>
-                <input id="beatsPerBar" type="number" min="1" max="24" aria-label="Beats per bar">
+                <input id="beatsPerBar" type="number" min="1" max="16" aria-label="Beats per bar">
               </label>
               <label>
                 <span>Value</span>
-                <input id="beatValue" type="number" min="1" max="64" aria-label="Beat value">
+                <input id="beatValue" type="number" min="1" max="16" aria-label="Beat value">
               </label>
               <label>
-                <span>Acc</span>
+                <span>A. Freq</span>
                 <input id="accentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
               </label>
+			  <label>
+				<span>S. Freq</span>
+				<input id="subdivisionFrequency" type="number" min="1" max="4000" aria-label="Subdivision frequency">
+			  </label>
               <div class="settings-actions">
                 <span aria-hidden="true">&nbsp;</span>
                 <button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double</button>
               </div>
             </section>
           </section>
-
-          <section class="transport">
-            <button id="previousSong" type="button" aria-label="Previous song">◀◀</button>
-            <button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
-            <button id="nextSong" type="button" aria-label="Next song">▶▶</button>
-          </section>
-
-          <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
-
-          <section class="practice-speed" aria-label="Temporary tempo adjustment">
+		  
+		  <section class="practice-speed" aria-label="Temporary tempo adjustment">
             <button data-speed="-25" type="button">-25%</button>
             <button data-speed="-20" type="button">-20%</button>
             <button data-speed="-15" type="button">-15%</button>
@@ -84,6 +84,16 @@
             <button data-speed="20" type="button">+20%</button>
             <button data-speed="25" type="button">+25%</button>
           </section>
+
+          <section class="transport">
+            <button id="previousSong" type="button" aria-label="Previous song">◀◀</button>
+            <button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
+            <button id="nextSong" type="button" aria-label="Next song">▶▶</button>
+          </section>
+
+          <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
+
+
 
           <section class="notes-panel">
             <label for="notes">Notes</label>

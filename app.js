@@ -16,6 +16,7 @@ const SCHEDULER_INTERVAL_MS = 25;
 let audioContext = null;
 let tapTimes = [];
 let draggedItemId = null;
+let masterGain = null;
 
 const els = {
   songName: document.querySelector("#songName"),
@@ -41,7 +42,9 @@ const els = {
   mergeSongs: document.querySelector("#mergeSongs"),
   exportSongs: document.querySelector("#exportSongs"),
   clearSongs: document.querySelector("#clearSongs"),
-  importFile: document.querySelector("#importFile")
+  importFile: document.querySelector("#importFile"),
+  subdivision: document.querySelector("#subdivision"),
+  subdivisionFrequency: document.querySelector("#subdivisionFrequency"),
 };
 
 function loadState() {
@@ -67,6 +70,8 @@ function normalizeState(raw) {
     notes: song.notes || "",
     beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
     beatValue: clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
+	subdivision: clamp(parseInt(song.subdivision, 10) || 1, 1, 8),
+    subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || 1200, 1, 4000),
     doubleTime: Boolean(song.doubleTime),
     accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : []
   }));
@@ -135,6 +140,8 @@ function render() {
   els.tempoValue.textContent = effectiveTempo(song);
   els.effectiveLabel.textContent = tempoLabel(song);
   els.playToggle.textContent = isPlaying ? "⏸" : "▶";
+  els.subdivision.value = song.subdivision;
+  els.subdivisionFrequency.value = song.subdivisionFrequency;
   document.querySelectorAll("[data-speed]").forEach((item) => item.classList.toggle("active", Number(item.dataset.speed) === tempSpeed));
   renderBeats(song);
   renderSongs(song);
@@ -154,6 +161,8 @@ function renderEmptyState() {
   els.doubleTime.ariaPressed = "false";
   els.notes.value = "";
   els.tempoValue.textContent = "--";
+  els.subdivision.value = "";
+  els.subdivisionFrequency.value = "";
   els.effectiveLabel.textContent = "Add a song";
   els.playToggle.textContent = "▶";
   els.beatDisplay.innerHTML = "";
@@ -329,8 +338,7 @@ function updateSong(patch) {
   if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
     sortedViewIds = sortedSongIds(sortMode);
   }
-  if (("tempo" in patch || "beatFrequency" in patch || "accentFrequency" in patch || "beatsPerBar" in patch) && isPlaying) restartClock();
-  if ("doubleTime" in patch && isPlaying) restartClock();
+  
   render();
 }
 
@@ -355,19 +363,23 @@ function toggleAccent(beat) {
 }
 
 function ensureAudioContext() {
-  audioContext ||= new AudioContext();
+  if (!audioContext) {
+    audioContext = new AudioContext();
+    masterGain = audioContext.createGain();
+    masterGain.connect(audioContext.destination);
+  }
   return audioContext;
 }
 
 function playClick(accented, time = ensureAudioContext().currentTime, song = selectedSong()) {
   const context = ensureAudioContext();
-  const oscillator = audioContext.createOscillator();
-  const gain = audioContext.createGain();
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
   oscillator.frequency.value = accented ? song.accentFrequency : song.beatFrequency;
   oscillator.type = "sine";
   gain.gain.setValueAtTime(accented ? 0.45 : 0.25, time);
   gain.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
-  oscillator.connect(gain).connect(context.destination);
+  oscillator.connect(gain).connect(masterGain);
   oscillator.start(time);
   oscillator.stop(time + 0.06);
 }
@@ -383,13 +395,33 @@ function scheduleBeat(beatIndex, time) {
   }, Math.max(0, (time - ensureAudioContext().currentTime) * 1000));
 }
 
+function scheduleSubClick(time, song) {
+  const context = ensureAudioContext();
+  const oscillator = context.createOscillator();
+  const gain = context.createGain();
+  oscillator.frequency.value = song.subdivisionFrequency;
+  oscillator.type = "sine";
+  gain.gain.setValueAtTime(0.08, time);
+  gain.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
+  oscillator.connect(gain).connect(masterGain);
+  oscillator.start(time);
+  oscillator.stop(time + 0.06);
+}
+
 function schedulerTick() {
   const song = selectedSong();
   if (!song || !audioContext) return;
   while (nextClickTime < audioContext.currentTime + SCHEDULE_AHEAD_SECONDS) {
+    const beatInterval = 60 / effectiveTempo(song);
     scheduleBeat(nextBeatIndex, nextClickTime);
+    if (song.subdivision >= 2) {
+      const subInterval = beatInterval / song.subdivision;
+      for (let i = 1; i < song.subdivision; i++) {
+        scheduleSubClick(nextClickTime + subInterval * i, song);
+      }
+    }
     nextBeatIndex = (nextBeatIndex + 1) % song.beatsPerBar;
-    nextClickTime += 60 / effectiveTempo(song);
+    nextClickTime += beatInterval;
   }
 }
 
@@ -413,6 +445,11 @@ function stopClock() {
   clearInterval(schedulerId);
   schedulerId = null;
   currentBeat = -1;
+  if (masterGain) {
+    masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+    masterGain.gain.setValueAtTime(0, audioContext.currentTime);
+    masterGain.gain.setValueAtTime(1, audioContext.currentTime + 0.08);
+  }
   render();
 }
 
@@ -485,10 +522,12 @@ function addSong() {
     tempo: 100,
     beatFrequency: 1000,
     accentFrequency: 800,
+	subdivisionFrequency: 1200,
     capo: 0,
     notes: "",
     beatsPerBar: 4,
     beatValue: 4,
+	subdivision: 1,
     doubleTime: false,
     accents: []
   };
@@ -570,7 +609,7 @@ async function mergeSongs(file) {
 }
 
 els.songName.addEventListener("input", (event) => updateSong({ name: event.target.value || "Untitled Song" }));
-els.capo.addEventListener("input", (event) => updateSong({ capo: clamp(parseInt(event.target.value, 10) || 0, 0, 12) }));
+els.capo.addEventListener("input", (event) => updateSong({ capo: clamp(parseInt(event.target.value, 10) || 0, 0, 16) }));
 els.tempoInput.addEventListener("input", (event) => {
   if (event.target.value === "") return;
   const tempo = parseInt(event.target.value, 10);
@@ -595,6 +634,22 @@ els.accentFrequency.addEventListener("input", (event) => {
 els.accentFrequency.addEventListener("blur", () => {
   updateSong({ accentFrequency: clamp(parseInt(els.accentFrequency.value, 10) || 800, 1, 4000) });
 });
+els.subdivision.addEventListener("input", (event) => {
+  if (event.target.value === "") return;
+  updateSong({ subdivision: clamp(parseInt(event.target.value, 10) || 1, 1, 16) });
+});
+els.subdivision.addEventListener("blur", () => {
+  updateSong({ subdivision: clamp(parseInt(els.subdivision.value, 10) || 1, 1, 16) });
+});
+els.subdivisionFrequency.addEventListener("input", (event) => {
+  if (event.target.value === "") return;
+  const frequency = parseInt(event.target.value, 10);
+  if (!Number.isFinite(frequency)) return;
+  updateSong({ subdivisionFrequency: clamp(frequency, 1, 4000) });
+});
+els.subdivisionFrequency.addEventListener("blur", () => {
+  updateSong({ subdivisionFrequency: clamp(parseInt(els.subdivisionFrequency.value, 10) || 1200, 1, 4000) });
+});
 els.tempoInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") {
     event.preventDefault();
@@ -602,13 +657,13 @@ els.tempoInput.addEventListener("keydown", (event) => {
   }
 });
 els.tempoInput.addEventListener("blur", commitTempoInput);
-els.beatsPerBar.addEventListener("input", (event) => updateSong({ beatsPerBar: clamp(parseInt(event.target.value, 10) || 1, 1, 24) }));
+els.beatsPerBar.addEventListener("input", (event) => updateSong({ beatsPerBar: clamp(parseInt(event.target.value, 10) || 1, 1, 16) }));
 els.beatValue.addEventListener("input", (event) => {
   if (event.target.value === "") return;
-  updateSong({ beatValue: clamp(parseInt(event.target.value, 10) || 1, 1, 64) });
+  updateSong({ beatValue: clamp(parseInt(event.target.value, 10) || 1, 1, 16) });
 });
 els.beatValue.addEventListener("blur", () => {
-  updateSong({ beatValue: clamp(parseInt(els.beatValue.value, 10) || 1, 1, 64) });
+  updateSong({ beatValue: clamp(parseInt(els.beatValue.value, 10) || 1, 1, 16) });
 });
 els.doubleTime.addEventListener("click", () => {
   const song = selectedSong();
@@ -677,8 +732,6 @@ function commitTempoInput() {
   const tempo = clamp(parseInt(els.tempoInput.value, 10) || 1, 1, 400);
   updateSong({ tempo });
 }
-
-
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
