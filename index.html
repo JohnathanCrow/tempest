@@ -94,14 +94,17 @@
       </section>
 
       <aside class="set-list" aria-label="Set list">
-        <div class="set-actions">
-          <button id="addSong" class="add-button" type="button" aria-label="Add song">New</button>
-          <button id="addDivider" type="button" aria-label="Add divider">Div</button>
-          <button id="importSongs" type="button">Import</button>
-          <button id="exportSongs" type="button">Export</button>
-          <button id="clearSongs" type="button">Clear</button>
-          <input id="importFile" type="file" accept="application/json" hidden>
-        </div>
+		<div class="set-actions-top">
+		  <button id="addSong" class="add-button" type="button" aria-label="Add song">New</button>
+		</div>
+		<div class="set-actions">
+		  <button id="addDivider" type="button" aria-label="Add divider">Div</button>
+		  <button id="replaceSongs" type="button">Replace</button>
+		  <button id="mergeSongs" type="button">Merge</button>
+		  <button id="exportSongs" type="button">Export</button>
+		  <button id="clearSongs" type="button">Clear</button>
+		  <input id="importFile" type="file" accept="application/json" hidden>
+		</div>
         <div class="sort-actions">
           <button data-sort="custom" type="button">Custom</button>
           <button data-sort="name" type="button">A-Z</button>

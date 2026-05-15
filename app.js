@@ -37,7 +37,8 @@ const els = {
   songsList: document.querySelector("#songsList"),
   addSong: document.querySelector("#addSong"),
   addDivider: document.querySelector("#addDivider"),
-  importSongs: document.querySelector("#importSongs"),
+  replaceSongs: document.querySelector("#replaceSongs"),
+  mergeSongs: document.querySelector("#mergeSongs"),
   exportSongs: document.querySelector("#exportSongs"),
   clearSongs: document.querySelector("#clearSongs"),
   importFile: document.querySelector("#importFile")
@@ -536,16 +537,36 @@ function exportSongs() {
   URL.revokeObjectURL(link.href);
 }
 
-async function importSongs(file) {
-  const text = await file.text();
-  const imported = normalizeState(JSON.parse(text));
-  state = imported;
-  selectedId = imported.selectedId;
-  sortMode = "custom";
-  sortedViewIds = [];
-  tempSpeed = 0;
-  stopClock();
-  render();
+async function replaceSongs(file) {
+  try {
+    const imported = normalizeState(JSON.parse(await file.text()));
+    state = imported;
+    selectedId = imported.selectedId;
+    sortMode = "custom";
+    sortedViewIds = [];
+    tempSpeed = 0;
+    stopClock();
+    render();
+  } catch {
+    alert("Failed to import file.");
+  }
+}
+
+async function mergeSongs(file) {
+  try {
+    const imported = normalizeState(JSON.parse(await file.text()));
+    const existingIds = new Set(state.songs.map((s) => s.id));
+    const newSongs = imported.songs.filter((s) => !existingIds.has(s.id));
+    const existingItemSongIds = new Set(state.items.filter((i) => i.type === "song").map((i) => i.songId));
+    const newItems = imported.items.filter((i) => i.type === "divider" || !existingItemSongIds.has(i.songId));
+    state.songs.push(...newSongs);
+    state.items.push(...newItems);
+    sortMode = "custom";
+    sortedViewIds = [];
+    render();
+  } catch {
+    alert("Failed to import file.");
+  }
 }
 
 els.songName.addEventListener("input", (event) => updateSong({ name: event.target.value || "Untitled Song" }));
@@ -631,9 +652,12 @@ document.querySelectorAll("[data-speed]").forEach((button) => {
 els.addSong.addEventListener("click", addSong);
 els.addDivider.addEventListener("click", addDivider);
 els.exportSongs.addEventListener("click", exportSongs);
-els.importSongs.addEventListener("click", () => els.importFile.click());
+let importMode = "replace";
+els.replaceSongs.addEventListener("click", () => { importMode = "replace"; els.importFile.click(); });
+els.mergeSongs.addEventListener("click", () => { importMode = "merge"; els.importFile.click(); });
 els.importFile.addEventListener("change", (event) => {
-  if (event.target.files[0]) importSongs(event.target.files[0]);
+  const file = event.target.files[0];
+  if (file) importMode === "merge" ? mergeSongs(file) : replaceSongs(file);
   event.target.value = "";
 });
 els.clearSongs.addEventListener("click", () => {

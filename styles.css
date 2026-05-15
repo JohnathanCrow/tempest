@@ -354,6 +354,21 @@ textarea:disabled {
   align-items: stretch;
 }
 
+.set-actions-top {
+  margin-bottom: 10px;
+}
+
+.set-actions-top button {
+  width: 100%;
+  min-height: 38px;
+  border-radius: 6px;
+  font-size: 1.00rem;
+  font-weight: 700;
+  background: var(--blue);
+  border-color: var(--blue);
+  color: var(--bg);
+}
+
 .sort-actions {
   display: grid;
   grid-template-columns: repeat(4, 1fr);
