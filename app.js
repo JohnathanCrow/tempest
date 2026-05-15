@@ -158,7 +158,7 @@ function renderEmptyState() {
   els.effectiveLabel.textContent = "Add a song";
   els.playToggle.textContent = "▶";
   els.beatDisplay.innerHTML = "";
-  els.songsList.innerHTML = `<div class="empty-set">No songs yet. Add one to start building the set.</div>`;
+  els.songsList.innerHTML = `<div class="empty-set">Add songs with the 'New' button.</div>`;
   document.querySelectorAll("[data-speed]").forEach((item) => item.classList.toggle("active", Number(item.dataset.speed) === 0));
 }
 
@@ -188,7 +188,7 @@ function setEditorDisabled(disabled) {
 function tempoLabel(song) {
   const pieces = [];
   if (song.doubleTime) pieces.push("double time");
-  if (tempSpeed !== 0) pieces.push(`${tempSpeed > 0 ? "+" : ""}${tempSpeed}% practice speed`);
+  if (tempSpeed !== 0) pieces.push(`${tempSpeed > 0 ? "+" : ""}${tempSpeed}%`);
   return pieces.length ? `${song.tempo} BPM, ${pieces.join(", ")}` : "Stored tempo";
 }
 
