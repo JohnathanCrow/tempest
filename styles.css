@@ -27,7 +27,6 @@ body {
 
 * {
   scrollbar-color: var(--line) transparent;
-  scrollbar-thumb: var(--muted);
   scrollbar-width: thin;
 }
 
@@ -197,12 +196,6 @@ label span,
   padding: 4px;
 }
 
-.set-actions {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-}
-
 .plain-button,
 .set-actions button,
 .sort-actions button,
@@ -355,6 +348,9 @@ textarea:disabled {
 }
 
 .set-actions {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
   align-items: stretch;
 }
 

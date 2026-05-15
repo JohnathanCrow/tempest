@@ -67,7 +67,7 @@ function normalizeState(raw) {
     beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
     beatValue: clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
     doubleTime: Boolean(song.doubleTime),
-    accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : [0]
+    accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : []
   }));
   const songIds = new Set(songs.map((song) => song.id));
   const rawItems = Array.isArray(raw.items)
@@ -122,7 +122,6 @@ function render() {
   selectedId = song.id;
   setEditorDisabled(false);
   els.songName.value = song.name;
-  resizeSongName();
   els.capo.value = song.capo;
   els.tempoInput.value = song.tempo;
   els.beatFrequency.value = song.beatFrequency;
@@ -144,7 +143,6 @@ function render() {
 function renderEmptyState() {
   setEditorDisabled(true);
   els.songName.value = "";
-  resizeSongName();
   els.capo.value = "";
   els.tempoInput.value = "";
   els.beatFrequency.value = "";
@@ -533,7 +531,7 @@ function exportSongs() {
   const blob = new Blob([JSON.stringify({ songs: state.songs, items: state.items }, null, 2)], { type: "application/json" });
   const link = document.createElement("a");
   link.href = URL.createObjectURL(blob);
-  link.download = "set-click-songs.json";
+  link.download = "tempest_setlist.json";
   link.click();
   URL.revokeObjectURL(link.href);
 }
@@ -556,7 +554,7 @@ els.tempoInput.addEventListener("input", (event) => {
   if (event.target.value === "") return;
   const tempo = parseInt(event.target.value, 10);
   if (!Number.isFinite(tempo) || tempo < 1) return;
-  updateSong({ tempo: clamp(tempo, 1, 300) });
+  updateSong({ tempo: clamp(tempo, 1, 400) });
 });
 els.beatFrequency.addEventListener("input", (event) => {
   if (event.target.value === "") return;
@@ -614,6 +612,7 @@ els.tapTempo.addEventListener("click", () => {
   const now = performance.now();
   tapTimes = tapTimes.filter((time) => now - time < 2500);
   tapTimes.push(now);
+  if (tapTimes.length > 8) tapTimes = tapTimes.slice(-8);
   if (tapTimes.length >= 2) {
     const intervals = tapTimes.slice(1).map((time, index) => time - tapTimes[index]);
     const average = intervals.reduce((sum, item) => sum + item, 0) / intervals.length;
@@ -655,10 +654,7 @@ function commitTempoInput() {
   updateSong({ tempo });
 }
 
-function resizeSongName() {
-  els.songName.style.height = "auto";
-  els.songName.style.height = `${els.songName.scrollHeight}px`;
-}
+
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
@@ -667,5 +663,21 @@ if ("serviceWorker" in navigator) {
     });
   });
 }
+
+document.addEventListener("keydown", (event) => {
+  if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+  if (event.key === " ") {
+    event.preventDefault();
+    isPlaying ? stopClock() : startClock();
+  }
+  if (event.key === "ArrowLeft") {
+    event.preventDefault();
+    els.previousSong.click();
+  }
+  if (event.key === "ArrowRight") {
+    event.preventDefault();
+    els.nextSong.click();
+  }
+});
 
 render();
