@@ -132,7 +132,7 @@ button {
 
 /* Right column items */
 .live-grid > *:nth-child(even) {
-  justify-self: center;
+  justify-self: start;
   text-align: left;
 }
 
@@ -207,6 +207,7 @@ label span,
   border-radius: 6px;
   background: transparent;
   color: var(--text);
+  padding: 0 1px;
 }
 
 .add-button {
@@ -215,9 +216,6 @@ label span,
   box-shadow: 0 0 20px var(--blue-glow) inset, 0 0 16px rgba(88, 168, 255, .22);
 }
 
-.plain-button {
-  padding: 0 14px;
-}
 
 .toggle-button.active {
   border-color: var(--blue);
@@ -271,13 +269,13 @@ textarea:disabled {
 
 .tempo-value {
   color: var(--blue);
-  font-size: clamp(6.0rem, 16.5vw, 8.4rem);
+  font-size: 10rem;
   line-height: .72;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 34px var(--blue-glow);
-  margin-top: 14px;
-  margin-left: -12px;
+  margin-top: 4px;
+  margin-left: -0px;
 }
 
 .play-button {
@@ -500,7 +498,7 @@ textarea:disabled {
   background: var(--blue-soft);
 }
 
-@media (max-width: 1050px) {
+@media (max-width: 1155px) {
   body {
     height: auto;
     overflow: auto;
@@ -523,7 +521,7 @@ textarea:disabled {
   }
 }
 
-@media (max-width: 560px) {
+@media (max-width: 160px) {
   .app-shell {
     width: min(100vw - 16px, 1180px);
     margin: 8px auto;
