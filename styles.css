@@ -3,13 +3,13 @@
   --bg: #050607;
   --panel: #101112;
   --panel-soft: #161719;
-  --line: #2b3030;
+  --line: #1d2121;
   --text: #f4f4f2;
   --muted: #989e9b;
   --blue: #58a8ff;
   --blue-soft: rgba(88, 168, 255, .14);
   --blue-glow: rgba(88, 168, 255, .32);
-  --danger: #f18c9a;
+  --danger: #e9655b;
 }
 
 * {
@@ -26,7 +26,8 @@ body {
 }
 
 * {
-  scrollbar-color: #3a4246 #0b0c0d;
+  scrollbar-color: var(--line) transparent;
+  scrollbar-thumb: var(--muted);
   scrollbar-width: thin;
 }
 
@@ -36,18 +37,18 @@ body {
 }
 
 ::-webkit-scrollbar-track {
-  background: #0b0c0d;
+  background: transparent;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: #3a4246;
+  background: var(--line);
   border: 2px solid #0b0c0d;
   border-radius: 999px;
 }
 
 ::-webkit-scrollbar-thumb:hover {
-  background: #596268;
+  background: var(--muted);
 }
 
 button,
@@ -72,16 +73,14 @@ button {
 
 .stage,
 .set-list {
-  border: 1px solid #232525;
-  background: linear-gradient(180deg, var(--panel) 0%, #070808 100%);
-  border-radius: 8px;
-  box-shadow: 0 28px 70px rgba(0, 0, 0, .36);
+  border: 1px solid var(--line);
+  background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
+  border-radius: 6px;
 }
 
 .stage {
   position: relative;
   overflow: hidden;
-  padding: 10px;
 }
 
 .sticky-console {
@@ -93,8 +92,6 @@ button {
   height: 100%;
   align-content: start;
   border-radius: 6px;
-  background: linear-gradient(180deg, rgba(16, 17, 18, .98), rgba(7, 8, 8, .98));
-  box-shadow: 0 18px 42px rgba(0, 0, 0, .38);
 }
 
 .stage-spacer {
@@ -107,8 +104,7 @@ button {
 
 .song-name {
   width: 100%;
-  min-height: 2.5em;
-  max-height: 2.5em;
+  min-height: 3.3em;
   resize: none;
   overflow: auto;
   border: 0;
@@ -124,21 +120,41 @@ button {
 
 .live-grid {
   display: grid;
-  grid-template-columns: minmax(300px, 1fr) minmax(430px, 1.12fr);
+  grid-template-columns: minmax(250px, 1.12fr) minmax(250px, 1.12fr);
   gap: 34px;
   align-items: start;
+}
+
+/* Left column items */
+.live-grid > *:nth-child(odd) {
+  justify-self: start;
+  text-align: left;
+}
+
+/* Right column items */
+.live-grid > *:nth-child(even) {
+  justify-self: center;
+  text-align: left;
 }
 
 .tempo-column {
   display: grid;
   gap: 10px;
   min-width: 0;
+  width: 220px;
+}
+
+.tempo-readout {
+  display: grid;
+  justify-items: start;
+  gap: 0;
+  width: 220px;
 }
 
 .settings-grid {
   display: grid;
-  grid-template-columns: minmax(66px, .7fr) minmax(78px, .8fr) minmax(78px, .8fr) minmax(132px, 1.25fr);
-  gap: 10px 16px;
+  grid-template-columns: minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr);
+  gap: 10px 12px;
   align-items: start;
   padding-top: 2px;
 }
@@ -172,11 +188,13 @@ label span,
   width: 100%;
   height: 38px;
   margin-top: 0;
-  border: 0;
-  background: transparent;
   color: var(--text);
   font-size: 1.4rem;
   outline: none;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: rgba(255, 255, 255, .025);
+  padding: 4px;
 }
 
 .set-actions {
@@ -192,7 +210,7 @@ label span,
 .transport button,
 .play-button {
   min-height: 38px;
-  border: 1px solid #343837;
+  border: 1px solid var(--line);
   border-radius: 6px;
   background: transparent;
   color: var(--text);
@@ -206,6 +224,7 @@ label span,
 
 .plain-button {
   padding: 0 14px;
+  
 }
 
 .toggle-button.active {
@@ -234,7 +253,7 @@ textarea:disabled {
 .beat {
   width: 32px;
   height: 32px;
-  border: 1px solid #363b3a;
+  border: 1px solid var(--line);
   border-radius: 50%;
   background: #0b0c0d;
   color: var(--muted);
@@ -254,23 +273,19 @@ textarea:disabled {
 .beat.current {
   background: var(--blue);
   border-color: var(--blue);
-  color: #03111f;
+  color: var(--bg);
   box-shadow: 0 0 26px var(--blue-glow);
-}
-
-.tempo-readout {
-  display: grid;
-  justify-items: start;
-  gap: 0;
 }
 
 .tempo-value {
   color: var(--blue);
-  font-size: clamp(6.3rem, 16.5vw, 10.2rem);
+  font-size: clamp(6.0rem, 16.5vw, 8.4rem);
   line-height: .72;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
   text-shadow: 0 0 34px var(--blue-glow);
+  margin-top: 14px;
+  margin-left: -12px;
 }
 
 .play-button {
@@ -322,16 +337,16 @@ textarea:disabled {
   min-height: 92px;
   max-height: 736px;
   margin-top: 12px;
-  border: 1px solid #272b2a;
+  border: 1px solid var(--line);
   border-radius: 6px;
   background: rgba(255, 255, 255, .025);
   color: var(--text);
-  padding: 12px;
+  padding: 10px;
   outline: none;
 }
 
 .set-list {
-  padding: 14px;
+  padding: 10px;
   min-height: 0;
   height: 100%;
   display: flex;
@@ -360,9 +375,9 @@ textarea:disabled {
 .set-actions .add-button {
   background: var(--blue);
   border-color: var(--blue);
-  color: #03111f;
+  color: var(--bg);
   font-size: 1.00rem;
-  font-weight: 800;
+  font-weight: 700;
 }
 
 .set-actions .divider-button {
@@ -376,17 +391,17 @@ textarea:disabled {
 }
 
 .songs {
-  margin-top: 16px;
+  margin-top: 12px;
   overflow: auto;
   min-height: 0;
-  padding-right: 4px;
+  padding-right: 6px;
 }
 
 .empty-set {
   color: var(--muted);
-  border: 1px dashed #303636;
+  border: 1px dashed var(--line);
   border-radius: 6px;
-  padding: 18px;
+  padding: 12px;
   line-height: 1.45;
 }
 
@@ -400,7 +415,7 @@ textarea:disabled {
   background: transparent;
   color: var(--text);
   text-align: left;
-  padding: 11px 10px;
+  padding: 8px 8px;
   border-radius: 6px;
 }
 
@@ -436,7 +451,6 @@ textarea:disabled {
 .song-item.active {
   border-color: var(--blue);
   background: var(--blue-soft);
-  box-shadow: 0 0 20px rgba(88, 168, 255, .2);
 }
 
 .song-title {
@@ -453,7 +467,7 @@ textarea:disabled {
   gap: 6px;
   color: var(--muted);
   font-size: .8rem;
-  margin-top: 2px;
+  margin-top: 1px;
 }
 
 .notes-icon {
@@ -467,7 +481,7 @@ textarea:disabled {
 }
 
 .song-bpm {
-  color: var(--text);
+  color: var(--muted);
   font-size: 1.22rem;
   font-variant-numeric: tabular-nums;
 }
@@ -490,7 +504,7 @@ textarea:disabled {
   background: var(--blue-soft);
 }
 
-@media (max-width: 850px) {
+@media (max-width: 1050px) {
   body {
     height: auto;
     overflow: auto;
