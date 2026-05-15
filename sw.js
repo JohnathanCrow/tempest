@@ -1,4 +1,4 @@
-const CACHE_NAME = "set-click-v9";
+const CACHE_NAME = "tempest-001";
 const APP_SHELL = [
   "./",
   "./index.html",
