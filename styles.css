@@ -1,15 +1,21 @@
 :root {
   color-scheme: dark;
-  --bg: #050607;
-  --panel: #101112;
-  --panel-soft: #161719;
-  --line: #1d2121;
-  --text: #f4f4f2;
-  --muted: #989e9b;
-  --blue: #58a8ff;
-  --blue-soft: rgba(88, 168, 255, .14);
-  --blue-glow: rgba(88, 168, 255, .32);
-  --danger: #e9655b;
+--bg: #0A090B;
+--panel: #131215;
+--panel-soft: #1A191B;
+--line: #222028;
+--muted: #A8ACAA;
+--text: #DEE1DF;
+
+--blue: #5B8EC7;
+--blue-soft: rgba(91, 142, 199, .14);
+--blue-glow: rgba(91, 142, 199, .32);
+--danger: #C44E4E;
+
+--purple: #A583AD;
+--green: #468146;
+--green-soft: rgba(91, 166, 91, .14);
+--green-glow: rgba(91, 166, 91, .32);
 }
 
 * {
@@ -103,13 +109,13 @@ button {
 
 .song-name {
   width: 100%;
-  min-height: 3.3em;
+  min-height: 2.2em;
   resize: none;
   overflow: auto;
   border: 0;
   background: transparent;
   color: var(--text);
-  font-size: clamp(1.85rem, 2.5vw, 2rem);
+  font-size: 2.2rem;
   line-height: 1.04;
   font-weight: 650;
   letter-spacing: 0;
@@ -119,7 +125,7 @@ button {
 
 .live-grid {
   display: grid;
-  grid-template-columns: minmax(250px, 1.12fr) minmax(250px, 1.12fr);
+  grid-template-columns: auto minmax(0, 1fr);
   gap: 34px;
   align-items: start;
 }
@@ -132,7 +138,7 @@ button {
 
 /* Right column items */
 .live-grid > *:nth-child(even) {
-  justify-self: start;
+  justify-self: end;
   text-align: left;
 }
 
@@ -152,10 +158,11 @@ button {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr) minmax(60px, 1fr);
+  grid-template-columns: repeat(5, minmax(60px, 60px));
   gap: 10px 12px;
   align-items: start;
   padding-top: 2px;
+  justify-self: end;
 }
 
 .settings-actions {
@@ -192,7 +199,7 @@ label span,
   outline: none;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: rgba(255, 255, 255, .025);
+  background: var(--bg);
   padding: 4px;
 }
 
@@ -207,13 +214,11 @@ label span,
   border-radius: 6px;
   background: transparent;
   color: var(--text);
-  padding: 0 1px;
 }
 
 .add-button {
   border-color: var(--blue);
-  background: var(--blue-soft);
-  box-shadow: 0 0 20px var(--blue-glow) inset, 0 0 16px rgba(88, 168, 255, .22);
+  background: var(--blue-soft);  
 }
 
 
@@ -329,7 +334,7 @@ textarea:disabled {
   margin-top: 12px;
   border: 1px solid var(--line);
   border-radius: 6px;
-  background: rgba(255, 255, 255, .025);
+  background: var(--bg);
   color: var(--text);
   padding: 10px;
   outline: none;
@@ -468,7 +473,7 @@ textarea:disabled {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #ffd24a;
+  background: #E8BE5F;
   box-shadow: 0 0 10px rgba(255, 210, 74, .34);
   display: inline-block;
   flex: 0 0 auto;
@@ -515,9 +520,42 @@ textarea:disabled {
     height: auto;
     max-height: none;
   }
+  
+  .song-name {
+    text-align: center;
+  }
 
   .live-grid {
     grid-template-columns: 1fr;
+  }
+  
+  .effective-label {
+    text-align: center;
+  }
+  
+  .tempo-readout {
+    justify-items: center;
+  }
+  
+  .tempo-value {
+    text-align: center;
+  }
+  
+  .live-grid > *:nth-child(odd) {
+    justify-self: center;
+  }
+
+  .live-grid > *:nth-child(even) {
+    justify-self: center;
+  }
+  
+  .settings-grid {
+  grid-template-columns: repeat(5, minmax(60px, 1fr));
+  justify-self: center;
+  }
+  
+  .practice-speed {
+    justify-content: center;
   }
 }
 
