@@ -158,7 +158,8 @@ button {
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(60px, 60px));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: 360px;
   gap: 10px 12px;
   align-items: start;
   padding-top: 2px;
@@ -308,11 +309,22 @@ textarea:disabled {
 
 .practice-speed {
   display: grid;
-  grid-template-columns: repeat(11, minmax(42px, 68px));
-  justify-content: stretch;
+  grid-template-columns: 1fr auto 1fr;
   align-items: center;
   gap: 8px;
   margin-top: 12px;
+}
+
+.practice-speed-negative,
+.practice-speed-positive {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.practice-speed-zero {
+  display: grid;
+  width: 80px;
 }
 
 .practice-speed button {
@@ -503,7 +515,7 @@ textarea:disabled {
   background: var(--blue-soft);
 }
 
-@media (max-width: 1155px) {
+@media (max-width: 1070px) {
   body {
     height: auto;
     overflow: auto;
@@ -550,8 +562,9 @@ textarea:disabled {
   }
   
   .settings-grid {
-  grid-template-columns: repeat(5, minmax(60px, 1fr));
+  grid-template-columns: repeat(5, minmax(0, 1fr));
   justify-self: center;
+  max-width: none;
   }
   
   .practice-speed {
@@ -559,21 +572,21 @@ textarea:disabled {
   }
 }
 
-@media (max-width: 160px) {
-  .app-shell {
-    width: min(100vw - 16px, 1180px);
-    margin: 8px auto;
-  }
-
+@media (max-width: 600px) {
   .settings-grid {
-    grid-template-columns: repeat(2, minmax(76px, 1fr));
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    justify-self: stretch;
+    min-width: 0;
   }
-
   .practice-speed {
-    grid-template-columns: repeat(4, 1fr);
+	grid-template-columns: 1fr;
+    justify-content: center;
   }
-
-  .set-actions {
-    flex-wrap: wrap;
+   .practice-speed-zero {
+	width: 100%;
   }
+  .song-name {
+    font-size: 1.4rem;
+    min-height: 1.8em;
+}
 }
