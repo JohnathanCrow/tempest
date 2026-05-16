@@ -223,7 +223,7 @@ function render() {
   els.notes.value                = song.notes;
   els.tempoValue.textContent     = effectiveTempo(song);
   els.effectiveLabel.textContent = tempoLabel(song);
-  els.playToggle.textContent     = isPlaying ? "⏸" : "▶";
+  els.playToggle.textContent     = isPlaying ? "⏸\uFE0E" : "▶";
 
   els.doubleTime.classList.toggle("active", song.doubleTime);
   els.doubleTime.ariaPressed = String(song.doubleTime);
@@ -900,7 +900,7 @@ document.addEventListener("keydown", (event) => {
    ============================================================ */
 
 window.addEventListener("resize", () => {
-  const isNarrow = window.innerWidth <= 1155;
+  const isNarrow = window.innerWidth <= 1050;
   if (!isNarrow) {
     document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
     document.querySelector("[data-tab='control']").classList.add("active");
