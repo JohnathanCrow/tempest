@@ -1,22 +1,34 @@
+/* ============================================================
+   TOKENS
+   ============================================================ */
+
 :root {
   color-scheme: dark;
---bg: #0A090B;
---panel: #131215;
---panel-soft: #1A191B;
---line: #222028;
---muted: #A8ACAA;
---text: #DEE1DF;
 
---blue: #5B8EC7;
---blue-soft: rgba(91, 142, 199, .14);
---blue-glow: rgba(91, 142, 199, .32);
---danger: #C44E4E;
+  --bg:         #0A090B;
+  --panel:      #131215;
+  --panel-soft: #1A191B;
+  --line:       #222028;
+  --muted:      #A8ACAA;
+  --text:       #DEE1DF;
 
---purple: #A583AD;
---green: #468146;
---green-soft: rgba(91, 166, 91, .14);
---green-glow: rgba(91, 166, 91, .32);
+  --blue:       #5B8EC7;
+  --blue-soft:  rgba(91, 142, 199, .14);
+  --blue-glow:  rgba(91, 142, 199, .32);
+
+  --green:      #468146;
+  --green-soft: rgba(91, 166, 91, .14);
+  --green-glow: rgba(91, 166, 91, .32);
+
+  --yellow:     #E8BE5F;
+  --purple:     #A583AD;
+  --danger:     #C44E4E;
 }
+
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
 
 * {
   box-sizing: border-box;
@@ -30,6 +42,30 @@ body {
   color: var(--text);
   font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
 }
+
+button,
+input,
+select,
+textarea {
+  font: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+button:disabled,
+input:disabled,
+select:disabled,
+textarea:disabled {
+  cursor: default;
+  opacity: .46;
+}
+
+
+/* ============================================================
+   SCROLLBARS
+   ============================================================ */
 
 * {
   scrollbar-color: var(--line) transparent;
@@ -56,16 +92,10 @@ body {
   background: var(--muted);
 }
 
-button,
-input,
-select,
-textarea {
-  font: inherit;
-}
 
-button {
-  cursor: pointer;
-}
+/* ============================================================
+   LAYOUT — APP SHELL
+   ============================================================ */
 
 .app-shell {
   width: min(1280px, calc(100vw - 32px));
@@ -88,6 +118,10 @@ button {
   overflow: hidden;
 }
 
+.stage-spacer {
+  display: none;
+}
+
 .sticky-console {
   position: relative;
   z-index: 2;
@@ -99,9 +133,44 @@ button {
   border-radius: 6px;
 }
 
-.stage-spacer {
+
+/* ============================================================
+   LAYOUT — PANEL TABS
+   ============================================================ */
+
+.panel-tabs {
   display: none;
+  grid-column: 1 / -1;
+  gap: 4px;
+  align-items: flex-end;
+  padding: 0;
 }
+
+.panel-tab {
+  padding: 6px 18px;
+  border: 1px solid var(--line);
+  border-bottom: none;
+  border-radius: 6px 6px 0 0;
+  background: var(--panel-soft);
+  color: var(--muted);
+  font-size: .85rem;
+  font-weight: 700;
+  letter-spacing: .04em;
+  cursor: pointer;
+  position: relative;
+  bottom: -1px;
+}
+
+.panel-tab.active {
+  background: var(--panel);
+  color: var(--blue);
+  border-color: var(--line);
+}
+
+
+/* ============================================================
+   STAGE — SONG HEADER
+   ============================================================ */
 
 .song-header {
   min-width: 0;
@@ -123,6 +192,11 @@ button {
   outline: none;
 }
 
+
+/* ============================================================
+   STAGE — LIVE GRID
+   ============================================================ */
+
 .live-grid {
   display: grid;
   grid-template-columns: auto minmax(0, 1fr);
@@ -130,17 +204,20 @@ button {
   align-items: start;
 }
 
-/* Left column items */
 .live-grid > *:nth-child(odd) {
   justify-self: start;
   text-align: left;
 }
 
-/* Right column items */
 .live-grid > *:nth-child(even) {
   justify-self: end;
   text-align: left;
 }
+
+
+/* ============================================================
+   STAGE — TEMPO DISPLAY
+   ============================================================ */
 
 .tempo-column {
   display: grid;
@@ -156,29 +233,6 @@ button {
   width: 220px;
 }
 
-.settings-grid {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  max-width: 360px;
-  gap: 10px 12px;
-  align-items: start;
-  padding-top: 2px;
-  justify-self: end;
-}
-
-.settings-actions {
-  display: grid;
-  grid-template-rows: 18px 38px;
-  gap: 4px;
-  min-width: 0;
-}
-
-.settings-grid label {
-  display: grid;
-  grid-template-rows: 18px 38px;
-  gap: 4px;
-}
-
 label span,
 .effective-label,
 .notes-panel label,
@@ -191,10 +245,47 @@ label span,
   letter-spacing: .08em;
 }
 
+.tempo-value {
+  color: var(--blue);
+  font-size: 10rem;
+  line-height: .72;
+  font-weight: 760;
+  font-variant-numeric: tabular-nums;
+  text-shadow: 0 0 34px var(--blue-glow);
+  margin-top: 4px;
+}
+
+
+/* ============================================================
+   STAGE — SETTINGS GRID
+   ============================================================ */
+
+.settings-grid {
+  display: grid;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  max-width: 360px;
+  gap: 10px 12px;
+  align-items: start;
+  padding-top: 2px;
+  justify-self: end;
+}
+
+.settings-grid label {
+  display: grid;
+  grid-template-rows: 18px 38px;
+  gap: 4px;
+}
+
+.settings-actions {
+  display: grid;
+  grid-template-rows: 18px 38px;
+  gap: 4px;
+  min-width: 0;
+}
+
 .settings-grid input {
   width: 100%;
   height: 38px;
-  margin-top: 0;
   color: var(--text);
   font-size: 1.1rem;
   outline: none;
@@ -204,38 +295,10 @@ label span,
   padding: 4px;
 }
 
-.plain-button,
-.set-actions button,
-.sort-actions button,
-.practice-speed button,
-.transport button,
-.play-button {
-  min-height: 38px;
-  border: 1px solid var(--line);
-  border-radius: 6px;
-  background: transparent;
-  color: var(--text);
-}
 
-.add-button {
-  border-color: var(--blue);
-  background: var(--blue-soft);  
-}
-
-
-.toggle-button.active {
-  border-color: var(--blue);
-  background: var(--blue-soft);
-  color: var(--blue);
-}
-
-button:disabled,
-input:disabled,
-select:disabled,
-textarea:disabled {
-  cursor: default;
-  opacity: .46;
-}
+/* ============================================================
+   STAGE — BEAT DISPLAY
+   ============================================================ */
 
 .beat-display {
   min-height: 42px;
@@ -262,8 +325,8 @@ textarea:disabled {
 .beat.accent {
   border-color: var(--blue);
   color: var(--blue);
-  box-shadow: 0 0 16px var(--blue-glow);
   background: var(--blue-soft);
+  box-shadow: 0 0 16px var(--blue-glow);
 }
 
 .beat.current {
@@ -273,23 +336,10 @@ textarea:disabled {
   box-shadow: 0 0 26px var(--blue-glow);
 }
 
-.tempo-value {
-  color: var(--blue);
-  font-size: 10rem;
-  line-height: .72;
-  font-weight: 760;
-  font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 34px var(--blue-glow);
-  margin-top: 4px;
-  margin-left: -0px;
-}
 
-.play-button {
-  width: 76px;
-  height: 52px;
-  border-color: transparent;
-  font-size: 2.5rem;
-}
+/* ============================================================
+   STAGE — TRANSPORT
+   ============================================================ */
 
 .transport {
   display: grid;
@@ -306,6 +356,18 @@ textarea:disabled {
   border: 0;
   color: var(--text);
 }
+
+.play-button {
+  width: 76px;
+  height: 52px;
+  border-color: transparent;
+  font-size: 2.5rem;
+}
+
+
+/* ============================================================
+   STAGE — PRACTICE SPEED
+   ============================================================ */
 
 .practice-speed {
   display: grid;
@@ -338,6 +400,11 @@ textarea:disabled {
   border: 1px solid var(--blue);
 }
 
+
+/* ============================================================
+   STAGE — NOTES PANEL
+   ============================================================ */
+
 .notes-panel textarea {
   width: 100%;
   resize: vertical;
@@ -352,6 +419,48 @@ textarea:disabled {
   outline: none;
 }
 
+
+/* ============================================================
+   BUTTONS — SHARED STYLES
+   ============================================================ */
+
+.plain-button,
+.set-actions button,
+.sort-actions button,
+.practice-speed button,
+.transport button,
+.play-button {
+  min-height: 38px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: transparent;
+  color: var(--text);
+}
+
+.transport button {
+  border: 0;
+}
+
+.practice-speed button {
+  border: 0;
+}
+
+.add-button {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+}
+
+.toggle-button.active {
+  border-color: var(--blue);
+  background: var(--blue-soft);
+  color: var(--blue);
+}
+
+
+/* ============================================================
+   SET LIST PANEL
+   ============================================================ */
+
 .set-list {
   padding: 10px;
   min-height: 0;
@@ -359,13 +468,6 @@ textarea:disabled {
   display: flex;
   flex-direction: column;
   overflow: hidden;
-}
-
-.set-actions {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 10px;
-  align-items: stretch;
 }
 
 .set-actions-top {
@@ -383,11 +485,11 @@ textarea:disabled {
   color: var(--bg);
 }
 
-.sort-actions {
+.set-actions {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  margin-top: 10px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+  gap: 10px;
+  align-items: stretch;
 }
 
 .set-actions button,
@@ -397,8 +499,37 @@ textarea:disabled {
   font-size: 1rem;
 }
 
+.set-actions #addDivider {
+  color: var(--purple);
+}
+
+.set-actions #replaceSongs {
+  color: var(--yellow);
+}
+
+.set-actions #mergeSongs {
+  color: var(--yellow);
+}
+
+.set-actions #exportSongs {
+  color: var(--green);
+}
+
 .set-actions #clearSongs {
   color: var(--danger);
+}
+
+.sort-actions {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  margin-top: 10px;
+}
+
+.sort-actions button.active-sort {
+  border-color: var(--blue);
+  color: var(--blue);
+  background: var(--blue-soft);
 }
 
 .songs {
@@ -416,6 +547,11 @@ textarea:disabled {
   line-height: 1.45;
 }
 
+
+/* ============================================================
+   SET LIST — SONG ITEMS
+   ============================================================ */
+
 .song-item {
   width: 100%;
   display: grid;
@@ -426,23 +562,13 @@ textarea:disabled {
   background: transparent;
   color: var(--text);
   text-align: left;
-  padding: 8px 8px;
+  padding: 8px;
   border-radius: 6px;
 }
 
-.divider-item {
-  width: 100%;
-  display: grid;
-  grid-template-columns: minmax(0, 1fr) auto;
-  gap: 8px;
-  align-items: center;
-  color: var(--muted);
-  padding: 9px 10px;
-}
-
-.divider-rule {
-  height: 1px;
-  background: #303636;
+.song-item.active {
+  border-color: var(--blue);
+  background: var(--blue-soft);
 }
 
 .song-item.dragging,
@@ -457,11 +583,6 @@ textarea:disabled {
   color: inherit;
   text-align: left;
   padding: 0;
-}
-
-.song-item.active {
-  border-color: var(--blue);
-  background: var(--blue-soft);
 }
 
 .song-title {
@@ -485,7 +606,7 @@ textarea:disabled {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: #E8BE5F;
+  background: var(--yellow)
   box-shadow: 0 0 10px rgba(255, 210, 74, .34);
   display: inline-block;
   flex: 0 0 auto;
@@ -509,21 +630,43 @@ textarea:disabled {
   appearance: none;
 }
 
-.sort-actions button.active-sort {
-  border-color: var(--blue);
-  color: var(--blue);
-  background: var(--blue-soft);
+
+/* ============================================================
+   SET LIST — DIVIDERS
+   ============================================================ */
+
+.divider-item {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 8px;
+  align-items: center;
+  color: var(--muted);
+  padding: 9px 10px;
 }
 
-@media (max-width: 1070px) {
+.divider-rule {
+  height: 1px;
+  background: var(--purple);
+}
+
+
+/* ============================================================
+   RESPONSIVE — NARROW (TABLET / SMALL DESKTOP)
+   ============================================================ */
+
+@media (max-width: 1050px) {
   body {
     height: auto;
     overflow: auto;
+    background: var(--bg);
   }
 
   .app-shell {
     grid-template-columns: 1fr;
+    grid-template-rows: auto 1fr;
     height: auto;
+    row-gap: 0;
   }
 
   .stage,
@@ -531,62 +674,88 @@ textarea:disabled {
     min-height: 260px;
     height: auto;
     max-height: none;
+    border-radius: 0 0 6px 6px;
   }
-  
+
+  .stage {
+    border-top: none;
+  }
+
+  .panel-tabs {
+    display: flex;
+    align-items: flex-end;
+  }
+
+  .panel-tab {
+    flex: 1;
+    text-align: center;
+    border-radius: 6px 6px 0 0;
+  }
+
   .song-name {
+    font-size: 1.8rem;
     text-align: center;
   }
 
   .live-grid {
     grid-template-columns: 1fr;
   }
-  
-  .effective-label {
-    text-align: center;
-  }
-  
-  .tempo-readout {
-    justify-items: center;
-  }
-  
-  .tempo-value {
-    text-align: center;
-  }
-  
-  .live-grid > *:nth-child(odd) {
-    justify-self: center;
-  }
 
+  .live-grid > *:nth-child(odd),
   .live-grid > *:nth-child(even) {
     justify-self: center;
   }
-  
-  .settings-grid {
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  justify-self: center;
-  max-width: none;
+
+  .tempo-readout {
+    justify-items: center;
   }
-  
+
+  .effective-label {
+    text-align: center;
+  }
+
+  .tempo-value {
+    text-align: center;
+  }
+
+  .settings-grid {
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    max-width: none;
+    justify-self: center;
+  }
+
   .practice-speed {
     justify-content: center;
   }
 }
 
-@media (max-width: 600px) {
+
+/* ============================================================
+   RESPONSIVE — MOBILE
+   ============================================================ */
+
+@media (max-width: 650px) {
+  .song-name {
+    font-size: 1.2rem;
+    min-height: 1.9rem;
+  }
+
+  .tempo-value {
+    font-size: 7rem;
+  }
+
   .settings-grid {
     grid-template-columns: repeat(5, minmax(0, 1fr));
     justify-self: stretch;
     min-width: 0;
   }
+
   .practice-speed {
-	grid-template-columns: 1fr;
+    grid-template-columns: 1fr;
     justify-content: center;
   }
-   .practice-speed-zero {
-	width: 100%;
+
+  .practice-speed-zero {
+    width: 100%;
   }
-  .song-name {
-    font-size: 1.4rem;
-    min-height: 1.8em;
-}
 }
