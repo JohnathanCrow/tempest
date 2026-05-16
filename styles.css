@@ -727,6 +727,13 @@ label span,
   .practice-speed {
     justify-content: center;
   }
+  
+  .set-actions button,
+  .sort-actions button {
+    min-width: 0;
+    padding: 0 10px;
+    font-size: 0.8rem;
+  }
 }
 
 
@@ -737,7 +744,7 @@ label span,
 @media (max-width: 650px) {
   .song-name {
     font-size: 1.2rem;
-    min-height: 1.9rem;
+    min-height: 2.0rem;
   }
 
   .tempo-value {

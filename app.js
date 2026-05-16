@@ -699,7 +699,7 @@ function applyTab(tab) {
   const setList = document.querySelector(".set-list");
   const stageMain = document.querySelector(".stage-main");
   const isMobile = window.innerWidth <= 600;
-  const isNarrow = window.innerWidth <= 1155;
+  const isNarrow = window.innerWidth <= 1050;
 
   if (!isNarrow) {
     stage.style.display = "";
