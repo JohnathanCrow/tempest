@@ -103,12 +103,16 @@
 				<div class="stage-spacer" aria-hidden="true"></div>
 			</section>
 			<!-- Sidebar Set List Management -->
-			<aside class="set-list" aria-label="Set list">
-				<div class="set-actions-top">
-					<button id="addSong" class="add-button" type="button" aria-label="Add song">New</button>
+			<aside class="set-list" aria-label="Set list">			
+				<div class="setlist-bar">
+					<select id="setlistSelect" class="setlist-select" aria-label="Active setlist">
+						<option>Setlist 1</option>
+					</select>
+					<button id="addSetlist" class="plain-button" type="button" aria-label="Add setlist">+</button>
+					<button id="renameSetlist" class="plain-button" type="button" aria-label="Rename setlist">✎</button>
+					<button id="deleteSetlist" class="plain-button" type="button" aria-label="Delete setlist">×</button>
 				</div>
 				<div class="set-actions">
-					<button id="addDivider" type="button" aria-label="Add divider">Div</button>
 					<button id="exportSongs" type="button">Export</button>
 					<button id="replaceSongs" type="button">Import</button>
 					<button id="mergeSongs" type="button">Merge</button>
@@ -120,6 +124,10 @@
 					<button data-sort="name" type="button">A-Z</button>
 					<button data-sort="tempo" type="button">BPM</button>
 					<button data-sort="capo" type="button">Capo</button>
+				</div>
+				<div class="song-actions-bottom">
+					<button id="addSong" type="button" aria-label="Add song">New</button>
+					<button id="addDivider" type="button" aria-label="Add divider">Div</button>
 				</div>
 				<div id="songsList" class="songs"></div>
 			</aside>

@@ -163,8 +163,6 @@ textarea:disabled {
 .panel-tab.active {
 	background: var(--panel);
 	color: var(--blue);
-	*/ border-color: var(--line);
-	*/
 }
 
 
@@ -577,26 +575,38 @@ label span,
 	overflow: hidden;
 }
 
-.set-actions-top {
-	margin-bottom: 10px;
-}
-
-.set-actions-top button {
-	width: 100%;
-	min-height: 38px;
-	border-radius: 6px;
-	font-size: 1rem;
-	font-weight: 700;
-	background: var(--blue);
-	border-color: var(--blue);
-	color: var(--bg);
-}
-
 .set-actions {
-	display: grid;
-	grid-template-columns: repeat(5, minmax(0, 1fr));
-	gap: 10px;
-	align-items: stretch;
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 10px;
+}
+
+.song-actions-bottom {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 10px;
+    margin-top: 10px;
+}
+
+.song-actions-bottom button {
+    min-height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--blue);
+    font-size: .76rem;
+    font-weight: 700;
+    cursor: pointer;
+	letter-spacing: .08em;
+	text-transform: uppercase;
+}
+
+.song-actions-bottom button:hover {
+    background: var(--line);
+}
+
+.song-actions-bottom button:active {
+    opacity: .7;
 }
 
 .set-actions button,
@@ -614,7 +624,7 @@ label span,
 }
 
 .set-actions #mergeSongs {
-	color: var(--yellow);
+	color: #C4834E;;
 }
 
 .set-actions #exportSongs {
@@ -633,9 +643,9 @@ label span,
 }
 
 .sort-actions button.active-sort {
-	border-color: transparent;
-	color: var(--blue);
-	background: var(--panel-soft);
+    border-color: transparent;
+    color: var(--purple);
+    background: var(--panel-soft);
 }
 
 .songs {
@@ -754,8 +764,57 @@ label span,
 
 .divider-rule {
 	height: 1px;
-	background: var(--purple);
+	background: var(--muted);
 }
+
+/* ============================================================
+   SET LIST — SETLIST BAR
+   ============================================================ */
+
+.setlist-bar {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    margin-bottom: 10px;
+}
+
+.setlist-select {
+    flex: 1;
+    min-width: 0;
+    height: 38px;
+    border: 1px solid var(--line);
+    border-radius: 6px;
+    background: var(--bg);
+    color: var(--text);
+    padding: 0 8px;
+    outline: none;
+    cursor: pointer;
+    font-size: .9rem;
+}
+
+.setlist-select:focus {
+    border-color: var(--blue);
+}
+
+.setlist-bar .plain-button {
+    width: 38px;
+    height: 38px;
+    padding: 0;
+    font-size: 1.1rem;
+    display: grid;
+    place-items: center;
+    flex-shrink: 0;
+}
+
+#addSetlist {
+    color: var(--blue);
+    border-color: var(--blue);
+}
+
+#deleteSetlist {
+    color: var(--danger);
+}
+
 
 /* ============================================================
    BUTTON HOVER & ACTIVE STATES

@@ -2,7 +2,7 @@
    CONSTANTS & STATE
    ============================================================ */
 
-const STORAGE_KEY = "set-click-metronome-v2";
+const STORAGE_KEY = "tempest-v3";
 const FREE_SONG_KEY = "tempest-freesong-v1";
 const FREE_MODE_KEY = "tempest-freemode-v1";
 const FLASH_KEY = "tempest-flash-v1";
@@ -23,16 +23,11 @@ const DEFAULT_FREE_SONG = {
 	notes: "",
 	accents: [],
 };
-const EMPTY_STATE = {
-	songs: [],
-	items: [],
-	selectedId: null
-};
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 
 let state = loadState();
-let selectedId = state.selectedId || state.songs[0]?.id || null;
+let selectedId = activeSetlist()?.selectedId || null;
 let sortMode = "custom";
 let sortedViewIds = [];
 let tempSpeed = 0;
@@ -106,109 +101,83 @@ const els = {
    ============================================================ */
 
 function loadState() {
-	try {
-		const saved = JSON.parse(localStorage.getItem(STORAGE_KEY));
-		if (Array.isArray(saved?.songs)) return normalizeState(saved);
-	} catch {
-		localStorage.removeItem(STORAGE_KEY);
-	}
-	return normalizeState(EMPTY_STATE);
+    try {
+        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+        if (raw?.setlists) return raw;
+
+        // Legacy migration
+        const legacy = JSON.parse(localStorage.getItem("set-click-metronome-v2"));
+        if (legacy?.songs) {
+            const setlist = { id: crypto.randomUUID(), name: "Setlist 1", ...normalizeSetlist(legacy) };
+            return { setlists: [setlist], activeSetlistId: setlist.id };
+        }
+    } catch {
+        localStorage.removeItem(STORAGE_KEY);
+    }
+    const setlist = { id: crypto.randomUUID(), name: "Setlist 1", ...normalizeSetlist({}) };
+    return { setlists: [setlist], activeSetlistId: setlist.id };
 }
 
 function saveState() {
-	localStorage.setItem(STORAGE_KEY, JSON.stringify({
-		songs: state.songs,
-		items: state.items,
-		selectedId,
-	}));
-	localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
-	localStorage.setItem(FREE_MODE_KEY, String(freeMode));
-	localStorage.setItem(FLASH_KEY, String(flashEnabled));
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+    localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
+    localStorage.setItem(FREE_MODE_KEY, String(freeMode));
+    localStorage.setItem(FLASH_KEY, String(flashEnabled));
 }
 
 function loadFreeSong() {
-	try {
-		const saved = JSON.parse(localStorage.getItem(FREE_SONG_KEY));
-		if (saved) return {
-			...DEFAULT_FREE_SONG,
-			...saved
-		};
-	} catch {}
-	return {
-		...DEFAULT_FREE_SONG
-	};
+    try {
+        const saved = JSON.parse(localStorage.getItem(FREE_SONG_KEY));
+        if (saved) return { ...DEFAULT_FREE_SONG, ...saved };
+    } catch {}
+    return { ...DEFAULT_FREE_SONG };
 }
 
-function normalizeState(raw) {
-	const songs = (raw.songs || []).map((song) => ({
-		id: song.id || crypto.randomUUID(),
-		name: song.name || "Untitled Song",
-		tempo: clamp(parseInt(song.tempo, 10) || 100, 1, 400),
-		beatFrequency: clamp(parseInt(song.beatFrequency, 10) || 1000, 1, 4000),
-		accentFrequency: clamp(parseInt(song.accentFrequency, 10) || 800, 1, 4000),
-		subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || 1200, 1, 4000),
-		capo: clamp(parseInt(song.capo, 10) || 0, 0, 12),
-		beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
-		beatValue: clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
-		subdivision: clamp(parseInt(song.subdivision, 10) || 1, 1, 8),
-		doubleTime: Boolean(song.doubleTime),
-		swing: clamp(parseInt(song.swing, 10) || 0, 0, 3),
-		notes: song.notes || "",
-		accents: Array.isArray(song.accents) ?
-			song.accents.filter((beat) => Number.isInteger(beat)) :
-			[],
-	}));
-
-	const songIds = new Set(songs.map((song) => song.id));
-	const rawItems = Array.isArray(raw.items) ?
-		raw.items :
-		songs.map((song) => ({
-			type: "song",
-			id: song.id,
-			songId: song.id
-		}));
-
-	const seenSongs = new Set();
-	const items = rawItems
-		.map((item) => {
-			if (item.type === "divider") {
-				return {
-					type: "divider",
-					id: item.id || crypto.randomUUID()
-				};
-			}
-			const songId = item.songId || item.id;
-			if (!songIds.has(songId) || seenSongs.has(songId)) return null;
-			seenSongs.add(songId);
-			return {
-				type: "song",
-				id: item.id || songId,
-				songId
-			};
-		})
-		.filter(Boolean);
-
-	songs.forEach((song) => {
-		if (!seenSongs.has(song.id)) {
-			items.push({
-				type: "song",
-				id: song.id,
-				songId: song.id
-			});
-		}
-	});
-
-	const selected = songs.some((song) => song.id === raw.selectedId) ?
-		raw.selectedId :
-		songs[0]?.id || null;
-
-	return {
-		songs,
-		items,
-		selectedId: selected
-	};
+function activeSetlist() {
+    return state.setlists.find(s => s.id === state.activeSetlistId) || state.setlists[0];
 }
 
+function normalizeSetlist(raw) {
+    const songs = (raw.songs || []).map((song) => ({
+        id: song.id || crypto.randomUUID(),
+        name: song.name || "Untitled Song",
+        tempo: clamp(parseInt(song.tempo, 10) || 100, 1, 400),
+        beatFrequency: clamp(parseInt(song.beatFrequency, 10) || 1000, 1, 4000),
+        accentFrequency: clamp(parseInt(song.accentFrequency, 10) || 800, 1, 4000),
+        subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || 1200, 1, 4000),
+        capo: clamp(parseInt(song.capo, 10) || 0, 0, 12),
+        beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
+        beatValue: clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
+        subdivision: clamp(parseInt(song.subdivision, 10) || 1, 1, 8),
+        doubleTime: Boolean(song.doubleTime),
+        swing: clamp(parseInt(song.swing, 10) || 0, 0, 3),
+        notes: song.notes || "",
+        accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : [],
+    }));
+
+    const songIds = new Set(songs.map((song) => song.id));
+    const rawItems = Array.isArray(raw.items) ?
+        raw.items :
+        songs.map((song) => ({ type: "song", id: song.id, songId: song.id }));
+
+    const seenSongs = new Set();
+    const items = rawItems.map((item) => {
+        if (item.type === "divider") return { type: "divider", id: item.id || crypto.randomUUID() };
+        const songId = item.songId || item.id;
+        if (!songIds.has(songId) || seenSongs.has(songId)) return null;
+        seenSongs.add(songId);
+        return { type: "song", id: item.id || songId, songId };
+    }).filter(Boolean);
+
+    songs.forEach((song) => {
+        if (!seenSongs.has(song.id)) items.push({ type: "song", id: song.id, songId: song.id });
+    });
+
+    const selectedId = songs.some((song) => song.id === raw.selectedId) ?
+        raw.selectedId : songs[0]?.id || null;
+
+    return { songs, items, selectedId };
+}
 
 /* ============================================================
    STATE — HELPERS
@@ -225,8 +194,8 @@ function swingRatio(song) {
 }
 
 function selectedSong() {
-	if (freeMode) return freeSong;
-	return state.songs.find((song) => song.id === selectedId) || state.songs[0] || null;
+    if (freeMode) return freeSong;
+    return activeSetlist().songs.find((song) => song.id === selectedId) || activeSetlist().songs[0] || null;
 }
 
 function effectiveTempo(song = selectedSong()) {
@@ -242,17 +211,13 @@ function tempoLabel(song) {
 }
 
 function getSong(id) {
-	return state.songs.find((song) => song.id === id) || null;
+    return activeSetlist().songs.find((song) => song.id === id) || null;
 }
 
 function visibleSetEntries() {
-	if (sortMode === "custom") return state.items;
-	if (!sortedViewIds.length) sortedViewIds = sortedSongIds(sortMode);
-	return sortedViewIds.map((songId) => ({
-		type: "song",
-		id: songId,
-		songId
-	}));
+    if (sortMode === "custom") return activeSetlist().items;
+    if (!sortedViewIds.length) sortedViewIds = sortedSongIds(sortMode);
+    return sortedViewIds.map((songId) => ({ type: "song", id: songId, songId }));
 }
 
 function visibleSongIds() {
@@ -262,17 +227,14 @@ function visibleSongIds() {
 }
 
 function sortedSongIds(mode) {
-	const collator = new Intl.Collator(undefined, {
-		numeric: true,
-		sensitivity: "base"
-	});
-	return [...state.songs]
-		.sort((a, b) => {
-			if (mode === "tempo") return a.tempo - b.tempo || collator.compare(a.name, b.name);
-			if (mode === "capo") return a.capo - b.capo || collator.compare(a.name, b.name);
-			return collator.compare(a.name, b.name);
-		})
-		.map((song) => song.id);
+    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
+    return [...activeSetlist().songs]
+        .sort((a, b) => {
+            if (mode === "tempo") return a.tempo - b.tempo || collator.compare(a.name, b.name);
+            if (mode === "capo") return a.capo - b.capo || collator.compare(a.name, b.name);
+            return collator.compare(a.name, b.name);
+        })
+        .map((song) => song.id);
 }
 
 
@@ -281,6 +243,17 @@ function sortedSongIds(mode) {
    ============================================================ */
 
 function render() {
+	const setlistSelect = document.querySelector("#setlistSelect");
+		if (setlistSelect) {
+			setlistSelect.innerHTML = "";
+			state.setlists.forEach(sl => {
+				const option = document.createElement("option");
+				option.value = sl.id;
+				option.textContent = sl.name;
+				option.selected = sl.id === state.activeSetlistId;
+				setlistSelect.append(option);
+			});
+		}
 	const song = selectedSong();
 	if (!song) {
 		selectedId = null;
@@ -523,18 +496,18 @@ function renderSongMeta(container, song) {
    ============================================================ */
 
 function updateSong(patch) {
-	if (freeMode) {
-		Object.assign(freeSong, patch);
-		render();
-		return;
-	}
-	const song = selectedSong();
-	if (!song) return;
-	Object.assign(song, patch);
-	if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
-		sortedViewIds = sortedSongIds(sortMode);
-	}
-	render();
+    if (freeMode) {
+        Object.assign(freeSong, patch);
+        render();
+        return;
+    }
+    const song = selectedSong();
+    if (!song) return;
+    Object.assign(song, patch);
+    if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
+        sortedViewIds = sortedSongIds(sortMode);
+    }
+    render();
 }
 
 function toggleFreeMode() {
@@ -586,82 +559,77 @@ function toggleAccent(beat) {
 }
 
 function addSong() {
-	const song = {
-		id: crypto.randomUUID(),
-		name: "",
-		tempo: 100,
-		beatFrequency: 1000,
-		accentFrequency: 800,
-		subdivisionFrequency: 1200,
-		capo: 0,
-		beatsPerBar: 4,
-		beatValue: 4,
-		subdivision: 1,
-		doubleTime: false,
-		swing: 0,
-		notes: "",
-		accents: [],
-	};
-	state.songs.push(song);
-	state.items.push({
-		type: "song",
-		id: song.id,
-		songId: song.id
-	});
-	sortMode = "custom";
-	sortedViewIds = [];
-	chooseSong(song.id);
+    const song = {
+        id: crypto.randomUUID(),
+        name: "",
+        tempo: 100,
+        beatFrequency: 1000,
+        accentFrequency: 800,
+        subdivisionFrequency: 1200,
+        capo: 0,
+        beatsPerBar: 4,
+        beatValue: 4,
+        subdivision: 1,
+        doubleTime: false,
+        swing: 0,
+        notes: "",
+        accents: [],
+    };
+    activeSetlist().songs.push(song);
+    activeSetlist().items.push({ type: "song", id: song.id, songId: song.id });
+    sortMode = "custom";
+    sortedViewIds = [];
+    chooseSong(song.id);
 }
 
 function addDivider() {
-	if (!state.songs.length) return;
-	state.items.push({
-		type: "divider",
-		id: crypto.randomUUID()
-	});
-	sortMode = "custom";
-	sortedViewIds = [];
-	render();
+    if (!activeSetlist().songs.length) return;
+    activeSetlist().items.push({ type: "divider", id: crypto.randomUUID() });
+    sortMode = "custom";
+    sortedViewIds = [];
+    render();
 }
 
 function deleteSong(id) {
-	const index = state.songs.findIndex((song) => song.id === id);
-	state.songs = state.songs.filter((song) => song.id !== id);
-	state.items = state.items.filter((item) => item.type !== "song" || item.songId !== id);
-	sortedViewIds = sortedViewIds.filter((songId) => songId !== id);
-	if (selectedId === id) {
-		selectedId = state.songs[Math.max(0, index - 1)]?.id || null;
-		tempSpeed = 0;
-	}
-	if (!state.songs.length) {
-		state.items = [];
-		stopClock();
-	}
-	render();
+    const sl = activeSetlist();
+    const index = sl.songs.findIndex((song) => song.id === id);
+    sl.songs = sl.songs.filter((song) => song.id !== id);
+    sl.items = sl.items.filter((item) => item.type !== "song" || item.songId !== id);
+    sortedViewIds = sortedViewIds.filter((songId) => songId !== id);
+    if (selectedId === id) {
+        selectedId = sl.songs[Math.max(0, index - 1)]?.id || null;
+        tempSpeed = 0;
+    }
+    if (!sl.songs.length) {
+        sl.items = [];
+        stopClock();
+    }
+    render();
 }
 
 function deleteDivider(id) {
-	state.items = state.items.filter((item) => item.id !== id);
-	render();
+    activeSetlist().items = activeSetlist().items.filter((item) => item.id !== id);
+    render();
 }
 
 function moveItem(sourceId, targetId) {
-	if (!sourceId || sourceId === targetId) return;
-	if (sortMode !== "custom") {
-		const sourceIndex = sortedViewIds.indexOf(sourceId);
-		const targetIndex = sortedViewIds.indexOf(targetId);
-		if (sourceIndex < 0 || targetIndex < 0) return;
-		const [songId] = sortedViewIds.splice(sourceIndex, 1);
-		sortedViewIds.splice(targetIndex, 0, songId);
-		render();
-		return;
-	}
-	const sourceIndex = state.items.findIndex((item) => item.id === sourceId);
-	const targetIndex = state.items.findIndex((item) => item.id === targetId);
-	if (sourceIndex < 0 || targetIndex < 0) return;
-	const [item] = state.items.splice(sourceIndex, 1);
-	state.items.splice(targetIndex, 0, item);
-	render();
+    if (!sourceId || sourceId === targetId) return;
+    if (sortMode !== "custom") {
+        const sourceIndex = sortedViewIds.indexOf(sourceId);
+        const targetIndex = sortedViewIds.indexOf(targetId);
+        if (sourceIndex < 0 || targetIndex < 0) return;
+        const [songId] = sortedViewIds.splice(sourceIndex, 1);
+        sortedViewIds.splice(targetIndex, 0, songId);
+        render();
+        return;
+    }
+    const items = activeSetlist().items;
+    const sourceIndex = items.findIndex((item) => item.id === sourceId);
+    const targetIndex = items.findIndex((item) => item.id === targetId);
+    if (sourceIndex < 0 || targetIndex < 0) return;
+    const [item] = items.splice(sourceIndex, 1);
+    items.splice(targetIndex, 0, item);
+    render();
 }
 
 function sortSongs(mode) {
@@ -670,58 +638,106 @@ function sortSongs(mode) {
 	render();
 }
 
+/* ============================================================
+   SETLIST ACTIONS
+   ============================================================ */
+
+function addSetlist() {
+    const number = state.setlists.length + 1;
+    const name = prompt("New setlist name:", `Setlist ${number}`);
+    if (!name) return;
+    const setlist = { id: crypto.randomUUID(), name: name.trim() || `Setlist ${number}`, ...normalizeSetlist({}) };
+    state.setlists.push(setlist);
+    switchSetlist(setlist.id);
+}
+
+function deleteSetlist() {
+    if (state.setlists.length === 1) {
+        alert("You must have at least one setlist.");
+        return;
+    }
+    if (!confirm(`Delete "${activeSetlist().name}"?`)) return;
+    const index = state.setlists.findIndex(s => s.id === state.activeSetlistId);
+    state.setlists = state.setlists.filter(s => s.id !== state.activeSetlistId);
+    state.activeSetlistId = state.setlists[Math.max(0, index - 1)].id;
+    selectedId = activeSetlist().selectedId || null;
+    sortMode = "custom";
+    sortedViewIds = [];
+    tempSpeed = 0;
+    stopClock();
+    render();
+}
+
+function renameSetlist() {
+    const sl = activeSetlist();
+    const name = prompt("Rename setlist:", sl.name);
+    if (!name || name.trim() === sl.name) return;
+    sl.name = name.trim();
+    render();
+}
+
+function switchSetlist(id) {
+    if (id === state.activeSetlistId) return;
+    state.activeSetlistId = id;
+    selectedId = activeSetlist().selectedId || null;
+    sortMode = "custom";
+    sortedViewIds = [];
+    tempSpeed = 0;
+    stopClock();
+    render();
+}
 
 /* ============================================================
    IMPORT / EXPORT
    ============================================================ */
 
 function exportSongs() {
-	const input = prompt("Export filename:", "tempest_setlist");
-	if (input === null) return;
-	const filename = (input.trim() || "tempest_setlist") + ".json";
-	const blob = new Blob(
-		[JSON.stringify({ songs: state.songs, items: state.items }, null, 2)],
-		{ type: "application/json" }
-	);
-	const link = document.createElement("a");
-	link.href = URL.createObjectURL(blob);
-	link.download = filename;
-	link.click();
-	URL.revokeObjectURL(link.href);
+    const sl = activeSetlist();
+    const blob = new Blob(
+        [JSON.stringify({ songs: sl.songs, items: sl.items }, null, 2)],
+        { type: "application/json" }
+    );
+    const link = document.createElement("a");
+    link.href = URL.createObjectURL(blob);
+    link.download = `tempest_${sl.name.toLowerCase().replace(/\s+/g, "_")}.json`;
+    link.click();
+    URL.revokeObjectURL(link.href);
 }
 
 async function replaceSongs(file) {
-	try {
-		const imported = normalizeState(JSON.parse(await file.text()));
-		state = imported;
-		selectedId = imported.selectedId;
-		sortMode = "custom";
-		sortedViewIds = [];
-		tempSpeed = 0;
-		stopClock();
-		render();
-	} catch {
-		alert("Failed to import file.");
-	}
+    try {
+        const imported = normalizeSetlist(JSON.parse(await file.text()));
+        const sl = activeSetlist();
+        sl.songs = imported.songs;
+        sl.items = imported.items;
+        sl.selectedId = imported.selectedId;
+        selectedId = imported.selectedId;
+        sortMode = "custom";
+        sortedViewIds = [];
+        tempSpeed = 0;
+        stopClock();
+        render();
+    } catch {
+        alert("Failed to import file.");
+    }
 }
 
 async function mergeSongs(file) {
-	try {
-		const imported = normalizeState(JSON.parse(await file.text()));
-		const existingIds = new Set(state.songs.map((s) => s.id));
-		const existingItemSongIds = new Set(
-			state.items.filter((i) => i.type === "song").map((i) => i.songId)
-		);
-		state.songs.push(...imported.songs.filter((s) => !existingIds.has(s.id)));
-		state.items.push(...imported.items.filter(
-			(i) => i.type === "divider" || !existingItemSongIds.has(i.songId)
-		));
-		sortMode = "custom";
-		sortedViewIds = [];
-		render();
-	} catch {
-		alert("Failed to import file.");
-	}
+    try {
+        const imported = normalizeSetlist(JSON.parse(await file.text()));
+        const sl = activeSetlist();
+        const existingIds = new Set(sl.songs.map((s) => s.id));
+        const existingItemSongIds = new Set(sl.items.filter((i) => i.type === "song").map((i) => i.songId));
+        sl.songs.push(...imported.songs.filter((s) => !existingIds.has(s.id)));
+        sl.items.push(...imported.items.filter(
+            (i) => i.type === "divider" || !existingItemSongIds.has(i.songId)
+        ));
+        sortMode = "custom";
+        sortedViewIds = [];
+        render();
+    } catch {
+        alert("Failed to import file.");
+    }
 }
 
 
@@ -1103,20 +1119,28 @@ els.importFile.addEventListener("change", (event) => {
 });
 
 els.clearSongs.addEventListener("click", () => {
-	if (!confirm("Clear the entire setlist?")) return;
-	state = normalizeState(EMPTY_STATE);
-	selectedId = state.selectedId;
-	sortMode = "custom";
-	sortedViewIds = [];
-	tempSpeed = 0;
-	stopClock();
-	render();
+    if (!confirm("Clear the entire setlist?")) return;
+    const sl = activeSetlist();
+    const fresh = normalizeSetlist({});
+    sl.songs = fresh.songs;
+    sl.items = fresh.items;
+    sl.selectedId = fresh.selectedId;
+    selectedId = null;
+    sortMode = "custom";
+    sortedViewIds = [];
+    tempSpeed = 0;
+    stopClock();
+    render();
 });
 
 document.querySelectorAll("[data-sort]").forEach((button) =>
 	button.addEventListener("click", () => sortSongs(button.dataset.sort))
 );
 
+document.querySelector("#addSetlist").addEventListener("click", addSetlist);
+document.querySelector("#renameSetlist").addEventListener("click", renameSetlist);
+document.querySelector("#deleteSetlist").addEventListener("click", deleteSetlist);
+document.querySelector("#setlistSelect").addEventListener("change", (event) => switchSetlist(event.target.value));
 
 /* ============================================================
    EVENT LISTENERS — INPUT AUTO-SELECT
