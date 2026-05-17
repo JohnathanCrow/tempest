@@ -761,50 +761,42 @@ label span,
    BUTTON HOVER & ACTIVE STATES
    ============================================================ */
 
-.plain-button:hover,
-.set-actions button:hover,
-.sort-actions button:hover {
-	background: var(--blue-soft);
-}
+@media (hover: hover) {
+	.plain-button:hover,
+	.set-actions button:hover,
+	.sort-actions button:hover {
+		background: var(--line);
+	}
 
-.plain-button:active,
-.set-actions button:active,
-.sort-actions button:active,
-.transport button:active {
-	opacity: .7;
-}
+	.set-actions-top button:hover {
+		background: var(--blue);
+		filter: brightness(1.15);
+	}
 
-.set-actions-top button:hover {
-	background: var(--blue);
-	filter: brightness(1.15);
-}
+	.transport button:hover {
+		color: var(--text);
+		filter: brightness(1.8);
+		text-shadow: 0 0 12px var(--blue-glow);
+	}
 
-.set-actions-top button:active {
-	opacity: .7;
-}
+	.practice-speed button:hover {
+		color: var(--text);
+		filter: brightness(1.4);
+	}
 
-.transport button:hover {
-	color: var(--text);
-	filter: brightness(1.8);
-	text-shadow: 0 0 12px var(--blue-glow);
-}
+	.delete-song:hover {
+		color: var(--danger);
+		filter: brightness(1.6);
+		text-shadow: 0 0 20px var(--blue-glow);
+	}
 
+	.set-actions #clearSongs:hover {
+		background: rgba(196, 78, 78, .14);
+	}
 
-.delete-song:hover {
-	color: var(--danger);
-	filter: brightness(1.6);
-	text-shadow: 0 0 20px var(--blue-glow);
-}
-
-
-.set-actions #clearSongs:hover {
-	background: rgba(196, 78, 78, .14);
-
-}
-
-.beat:hover {
-	background: var(--panel-soft);
-
+	.beat:hover {
+		background: var(--panel-soft);
+	}
 }
 
 
@@ -864,13 +856,6 @@ label span,
 		justify-self: end;
 	}
 
-
-	.set-actions button,
-	.sort-actions button {
-		min-width: 0;
-		padding: 0 10px;
-		font-size: 0.8rem;
-	}
 }
 
 .tempo-value {
@@ -883,6 +868,10 @@ label span,
    ============================================================ */
 
 @media (max-width: 600px) {
+	
+	.app-shell {
+	margin: 0 auto;
+}
 	.song-name {
 		font-size: 1.2rem;
 		min-height: 2.0rem;
@@ -891,6 +880,7 @@ label span,
 	.tempo-readout {
 		height: 110px;
 		overflow: hidden;
+		padding-top: 8px;
 	}
 
 	.tempo-column {
@@ -944,5 +934,8 @@ label span,
 		width: 100%;
 	}
 
-
+	.set-actions button,
+	.sort-actions button {
+		font-size: 0.65rem;
+	}
 }

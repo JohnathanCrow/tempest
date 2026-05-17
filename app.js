@@ -675,17 +675,16 @@ function sortSongs(mode) {
    ============================================================ */
 
 function exportSongs() {
+	const input = prompt("Export filename:", "tempest_setlist");
+	if (input === null) return;
+	const filename = (input.trim() || "tempest_setlist") + ".json";
 	const blob = new Blob(
-		[JSON.stringify({
-			songs: state.songs,
-			items: state.items
-		}, null, 2)], {
-			type: "application/json"
-		}
+		[JSON.stringify({ songs: state.songs, items: state.items }, null, 2)],
+		{ type: "application/json" }
 	);
 	const link = document.createElement("a");
 	link.href = URL.createObjectURL(blob);
-	link.download = "tempest_setlist.json";
+	link.download = filename;
 	link.click();
 	URL.revokeObjectURL(link.href);
 }
@@ -894,10 +893,12 @@ function updateTabVisibility() {
    ============================================================ */
 
 els.songName.addEventListener("input", (event) =>
-	updateSong({
-		name: event.target.value || "Untitled Song"
-	})
+	updateSong({ name: event.target.value })
 );
+
+els.songName.addEventListener("blur", (event) => {
+	if (!event.target.value.trim()) updateSong({ name: "Untitled Song" });
+});
 
 els.capo.addEventListener("input", (event) =>
 	updateSong({
@@ -926,11 +927,10 @@ els.timeSignature.addEventListener("blur", () => {
 els.timeSignature.addEventListener("focus", () => els.timeSignature.select());
 
 els.tempoValue.addEventListener("input", (event) => {
+	if (isPlaying) return;
 	const tempo = parseInt(event.target.textContent, 10);
 	if (!Number.isFinite(tempo) || tempo < 1) return;
-	updateSong({
-		tempo: clamp(tempo, 1, 400)
-	});
+	updateSong({ tempo: clamp(tempo, 1, 400) });
 });
 els.tempoValue.addEventListener("keydown", (event) => {
 	if (event.key === "Enter") {
