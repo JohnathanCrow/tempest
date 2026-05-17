@@ -19,6 +19,7 @@ const DEFAULT_FREE_SONG = {
   beatValue:            4,
   subdivision:          1,
   doubleTime:           false,
+  swing:                0,
   notes:                "",
   accents:              [],
 };
@@ -56,6 +57,7 @@ let tapTimes = [];
    ============================================================ */
 
 let draggedItemId = null;
+let isEditingTempo = false;
 
 
 /* ============================================================
@@ -65,12 +67,13 @@ let draggedItemId = null;
 const els = {
   songName:             document.querySelector("#songName"),
   capo:                 document.querySelector("#capo"),
-  tempoInput:           document.querySelector("#tempoInput"),
+  timeSignature: 		document.querySelector("#timeSignature"),
   beatFrequency:        document.querySelector("#beatFrequency"),
   accentFrequency:      document.querySelector("#accentFrequency"),
   beatsPerBar:          document.querySelector("#beatsPerBar"),
   beatValue:            document.querySelector("#beatValue"),
   doubleTime:           document.querySelector("#doubleTime"),
+  swingToggle: document.querySelector("#swingToggle"),
   subdivision:          document.querySelector("#subdivision"),
   subdivisionFrequency: document.querySelector("#subdivisionFrequency"),
   beatDisplay:          document.querySelector("#beatDisplay"),
@@ -89,6 +92,8 @@ const els = {
   exportSongs:          document.querySelector("#exportSongs"),
   clearSongs:           document.querySelector("#clearSongs"),
   importFile:           document.querySelector("#importFile"),
+  practiceSpeed:      document.querySelector("#practiceSpeed"),
+  practiceSpeedLabel: document.querySelector("#practiceSpeedLabel"),
 };
 
 
@@ -138,6 +143,7 @@ function normalizeState(raw) {
     beatValue:            clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
     subdivision:          clamp(parseInt(song.subdivision, 10) || 1, 1, 8),
     doubleTime:           Boolean(song.doubleTime),
+	swing:                clamp(parseInt(song.swing, 10) || 0, 0, 3),
     notes:                song.notes || "",
     accents:              Array.isArray(song.accents)
                             ? song.accents.filter((beat) => Number.isInteger(beat))
@@ -182,6 +188,12 @@ function normalizeState(raw) {
 
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+const SWING_RATIOS = [1, 1.16, 1.5, 2];
+
+function swingRatio(song) {
+  return SWING_RATIOS[song.swing || 0];
 }
 
 function selectedSong() {
@@ -247,15 +259,13 @@ function render() {
 
   els.songName.value             = song.name;
   els.capo.value                 = song.capo;
-  els.tempoInput.value           = song.tempo;
   els.beatFrequency.value        = song.beatFrequency;
   els.accentFrequency.value      = song.accentFrequency;
-  els.beatsPerBar.value          = song.beatsPerBar;
-  els.beatValue.value            = song.beatValue;
+
   els.subdivision.value          = song.subdivision;
   els.subdivisionFrequency.value = song.subdivisionFrequency;
   els.notes.value                = song.notes;
-  els.tempoValue.textContent     = effectiveTempo(song);
+  if (!isEditingTempo) els.tempoValue.textContent = effectiveTempo(song);
   els.effectiveLabel.textContent = tempoLabel(song);
   els.playToggle.textContent     = isPlaying ? "\u258E\u258E" : "\u25B6";
   els.playToggle.classList.toggle("is-playing", isPlaying);
@@ -278,10 +288,13 @@ function render() {
 
   els.doubleTime.classList.toggle("active", song.doubleTime);
   els.doubleTime.ariaPressed = String(song.doubleTime);
+  
+  els.swingToggle.classList.toggle("active", song.swing > 0);
+  els.swingToggle.textContent = SWING_LABELS[song.swing || 0];
+  els.swingToggle.ariaPressed = String(song.swing > 0);
 
-  document.querySelectorAll("[data-speed]").forEach((item) =>
-    item.classList.toggle("active", Number(item.dataset.speed) === tempSpeed)
-  );
+  els.practiceSpeed.value = tempSpeed;
+  els.practiceSpeedLabel.textContent = tempSpeed === 0 ? "0%" : `${tempSpeed > 0 ? "+" : ""}${tempSpeed}%`;
 
   renderBeats(song);
   renderSongs(song);
@@ -293,34 +306,33 @@ function renderEmptyState() {
 
   els.songName.value             = "";
   els.capo.value                 = "";
-  els.tempoInput.value           = "";
   els.beatFrequency.value        = "";
   els.accentFrequency.value      = "";
-  els.beatsPerBar.value          = "";
-  els.beatValue.value            = "4";
   els.subdivision.value          = "";
   els.subdivisionFrequency.value = "";
   els.notes.value                = "";
-  els.tempoValue.textContent     = "--";
+  els.tempoValue.textContent     = "";
   els.effectiveLabel.textContent = "Setlist empty";
   els.playToggle.textContent     = "\u25B6";
   els.beatDisplay.innerHTML      = "";
 
   els.doubleTime.classList.remove("active");
   els.doubleTime.ariaPressed = "false";
+  
+  els.swingToggle.classList.remove("active");
+  els.swingToggle.textContent = "Swing";
+  els.swingToggle.ariaPressed = "false";
 
   els.songsList.innerHTML = `<div class="empty-set">Add songs with the 'New' button.</div>`;
 
-  document.querySelectorAll("[data-speed]").forEach((item) =>
-    item.classList.toggle("active", Number(item.dataset.speed) === 0)
-  );
+  els.practiceSpeed.value = tempSpeed;
+  els.practiceSpeedLabel.textContent = tempSpeed === 0 ? "0%" : `${tempSpeed > 0 ? "+" : ""}${tempSpeed}%`;
 }
 
 function setEditorDisabled(disabled) {
   [
-    els.songName, els.capo, els.tempoInput,
+    els.songName, els.capo,
     els.beatFrequency, els.accentFrequency,
-    els.beatsPerBar, els.beatValue,
     els.doubleTime, els.notes,
     els.tapTempo, els.playToggle,
     els.previousSong, els.nextSong,
@@ -335,6 +347,10 @@ function renderBeats(song) {
   const validAccents = new Set(song.accents.filter((beat) => beat < song.beatsPerBar));
   song.accents = [...validAccents].sort((a, b) => a - b);
   els.beatDisplay.innerHTML = "";
+
+  if (els.timeSignature && !isEditingTempo) {
+    els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
+  }
 
   for (let index = 0; index < song.beatsPerBar; index += 1) {
     const button = document.createElement("button");
@@ -502,6 +518,14 @@ function toggleFlash() {
   saveState();
 }
 
+const SWING_LABELS = ["Swing", "Light", "Medium", "Hard"];
+
+function cycleSwing() {
+  const song = selectedSong();
+  if (!song) return;
+  updateSong({ swing: ((song.swing || 0) + 1) % 4 });
+}
+
 function chooseSong(id) {
   if (!id) return;
   freeMode = false;
@@ -534,6 +558,7 @@ function addSong() {
     beatValue:            4,
     subdivision:          1,
     doubleTime:           false,
+	swing:                0,
     notes:                "",
     accents:              [],
   };
@@ -715,15 +740,19 @@ function schedulerTick() {
   if (!song || !audioContext) return;
   while (nextClickTime < audioContext.currentTime + SCHEDULE_AHEAD_SECONDS) {
     const beatInterval = 60 / effectiveTempo(song);
+    const ratio = swingRatio(song);
+    const swungInterval = beatInterval * ratio / (1 + ratio);
+    const isSwungBeat = nextBeatIndex % 2 === 1;
+    const actualInterval = song.swing === 0 ? beatInterval : (isSwungBeat ? beatInterval - swungInterval : swungInterval);
     scheduleBeat(nextBeatIndex, nextClickTime);
     if (song.subdivision >= 2) {
-      const subInterval = beatInterval / song.subdivision;
+      const subInterval = actualInterval / song.subdivision;
       for (let i = 1; i < song.subdivision; i++) {
         scheduleSubClick(nextClickTime + subInterval * i, song);
       }
     }
     nextBeatIndex = (nextBeatIndex + 1) % song.beatsPerBar;
-    nextClickTime += beatInterval;
+    nextClickTime += actualInterval;
   }
 }
 
@@ -759,9 +788,6 @@ function restartClock() {
   if (isPlaying) startClock();
 }
 
-function commitTempoInput() {
-  updateSong({ tempo: clamp(parseInt(els.tempoInput.value, 10) || 1, 1, 400) });
-}
 
 
 /* ============================================================
@@ -826,34 +852,44 @@ els.capo.addEventListener("input", (event) =>
   updateSong({ capo: clamp(parseInt(event.target.value, 10) || 0, 0, 16) })
 );
 
-els.tempoInput.addEventListener("input", (event) => {
-  if (event.target.value === "") return;
-  const tempo = parseInt(event.target.value, 10);
+els.timeSignature.addEventListener("input", (event) => {
+  const raw = event.target.value;
+  const auto = raw.replace(/[^0-9]/g, "");
+  if (auto.length === 1) {
+    event.target.value = auto;
+  } else if (auto.length >= 2) {
+    event.target.value = `${auto[0]}/${auto[1]}`;
+    updateSong({
+      beatsPerBar: clamp(parseInt(auto[0], 10) || 1, 1, 24),
+      beatValue:   clamp(parseInt(auto[1], 10) || 1, 1, 64),
+    });
+  }
+});
+els.timeSignature.addEventListener("blur", () => {
+  const song = selectedSong();
+  if (song) els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
+});
+
+els.timeSignature.addEventListener("focus", () => els.timeSignature.select());
+
+els.tempoValue.addEventListener("input", (event) => {
+  const tempo = parseInt(event.target.textContent, 10);
   if (!Number.isFinite(tempo) || tempo < 1) return;
   updateSong({ tempo: clamp(tempo, 1, 400) });
 });
-els.tempoInput.addEventListener("keydown", (event) => {
-  if (event.key === "Enter") { event.preventDefault(); commitTempoInput(); }
+els.tempoValue.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") { event.preventDefault(); event.target.blur(); }
 });
-els.tempoInput.addEventListener("blur", commitTempoInput);
+els.tempoValue.addEventListener("focus", () => {
+  isEditingTempo = true;
+  const song = selectedSong();
+  if (song) els.tempoValue.textContent = song.tempo;
+});
+els.tempoValue.addEventListener("blur", () => {
+  isEditingTempo = false;
+  updateSong({ tempo: clamp(parseInt(els.tempoValue.textContent, 10) || 1, 1, 400) });
+});
 
-els.beatsPerBar.addEventListener("input", (event) => {
-  if (event.target.value === "") return;
-  const beats = parseInt(event.target.value, 10);
-  if (!Number.isFinite(beats) || beats < 1) return;
-  updateSong({ beatsPerBar: clamp(beats, 1, 16) });
-});
-els.beatsPerBar.addEventListener("blur", () =>
-  updateSong({ beatsPerBar: clamp(parseInt(els.beatsPerBar.value, 10) || 1, 1, 16) })
-);
-
-els.beatValue.addEventListener("input", (event) => {
-  if (event.target.value === "") return;
-  updateSong({ beatValue: clamp(parseInt(event.target.value, 10) || 1, 1, 16) });
-});
-els.beatValue.addEventListener("blur", () =>
-  updateSong({ beatValue: clamp(parseInt(els.beatValue.value, 10) || 1, 1, 16) })
-);
 
 els.beatFrequency.addEventListener("input", (event) => {
   if (event.target.value === "") return;
@@ -899,6 +935,8 @@ els.doubleTime.addEventListener("click", () => {
   updateSong({ doubleTime: !song.doubleTime });
 });
 
+els.swingToggle.addEventListener("click", cycleSwing);
+
 document.querySelector("#freeModeToggle").addEventListener("click", toggleFreeMode);
 document.querySelector("#flashToggle").addEventListener("click", toggleFlash);
 
@@ -935,15 +973,14 @@ els.tapTempo.addEventListener("click", () => {
   }
 });
 
-document.querySelectorAll("[data-speed]").forEach((button) => {
-  button.addEventListener("click", () => {
-    tempSpeed = Number(button.dataset.speed);
-    document.querySelectorAll("[data-speed]").forEach((item) =>
-      item.classList.toggle("active", Number(item.dataset.speed) === tempSpeed)
-    );
-    if (isPlaying) restartClock();
-    render();
-  });
+els.practiceSpeed.addEventListener("input", () => {
+  tempSpeed = Number(els.practiceSpeed.value);
+  els.practiceSpeedLabel.textContent = tempSpeed === 0 ? "0%" : `${tempSpeed > 0 ? "+" : ""}${tempSpeed}%`;
+  const song = selectedSong();
+  if (song) {
+    els.tempoValue.textContent = effectiveTempo(song);
+    els.effectiveLabel.textContent = tempoLabel(song);
+  }
 });
 
 

@@ -237,12 +237,10 @@ textarea:disabled {
   display: grid;
   place-items: center;
   margin-left: 8px;
-  filter: grayscale(1) brightness(1);
 }
 
 #flashToggle.active {
-  filter: none;
-  filter: grayscale(1) brightness(1);
+  color: var(--blue);
 }
 
 @keyframes flash-beat {
@@ -295,6 +293,7 @@ textarea:disabled {
   gap: 10px;
   min-width: 0;
   width: 220px;
+  height: 140px;
 }
 
 .tempo-readout {
@@ -302,6 +301,7 @@ textarea:disabled {
   justify-items: start;
   gap: 0;
   width: 220px;
+  height: 140px;
 }
 
 label span,
@@ -322,8 +322,20 @@ label span,
   line-height: .72;
   font-weight: 760;
   font-variant-numeric: tabular-nums;
-  text-shadow: 0 0 34px var(--blue-glow);
-  margin-top: 4px;
+  text-shadow: 0 0 12px var(--blue-glow);
+  margin-top: 4px;`
+  width: 100%;
+  background: transparent;
+  border: 0;
+  outline: none;
+  padding: 0;
+  display: block;
+  overflow: hidden;
+}
+
+.tempo-value::-webkit-outer-spin-button,
+.tempo-value::-webkit-inner-spin-button {
+  -webkit-appearance: none;
 }
 
 
@@ -333,8 +345,8 @@ label span,
 
 .settings-grid {
   display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  max-width: 360px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 220px;
   gap: 10px 12px;
   align-items: start;
   padding-top: 2px;
@@ -451,34 +463,29 @@ label span,
    ============================================================ */
 
 .practice-speed {
-  display: grid;
-  grid-template-columns: 1fr auto 1fr;
+  display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   margin-top: 26px;
 }
 
-.practice-speed-negative,
-.practice-speed-positive {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 8px;
+.practice-speed input[type="range"] {
+  flex: 1;
+  accent-color: var(--blue);
+  height: 4px;
+  background: var(--line);
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 999px;
 }
 
-.practice-speed-zero {
-  display: grid;
-  width: 80px;
-}
-
-.practice-speed button {
-  border: 0;
-  min-height: 34px;
-}
-
-.practice-speed button.active {
-  color: var(--blue);
-  background: transparent;
-  border: 0px solid var(--blue);
+.practice-speed-label {
+  color: var(--muted);
+  font-size: .85rem;
+  font-variant-numeric: tabular-nums;
+  min-width: 40px;
+  text-align: right;
+  margin-right: 12px;
 }
 
 
@@ -838,38 +845,11 @@ label span,
     display: block;
   }
 
-  .live-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .live-grid > *:nth-child(odd),
-  .live-grid > *:nth-child(even) {
-    justify-self: center;
-  }
-
-  .tempo-column {
-    justify-self: center;
-    width: auto;
-  }
-
-  .tempo-readout {
-    justify-items: center;
-    width: auto;
-  }
-
-  .effective-label {
-    text-align: center;
-  }
-
-  .tempo-value {
-    text-align: center;
-  }
-
   .settings-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    max-width: none;
-    justify-self: center;
-  }
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 220px;
+  justify-self: end;
+}
 
   .practice-speed {
     justify-content: center;
@@ -883,6 +863,10 @@ label span,
   }
 }
 
+.tempo-value {
+  text-shadow: 0 0 8px var(--blue-glow);
+}
+
 
 /* ============================================================
    RESPONSIVE — MOBILE
@@ -894,16 +878,56 @@ label span,
     min-height: 2.0rem;
   }
   
+  .tempo-readout {
+	  height: 100px;
+	  overflow: hidden;
+  }
+  
+  .tempo-column {
+	  height: 100px;
+  }
 
   .tempo-value {
     font-size: 7rem;
+	height: 100px;
+	text-shadow: 0 0 6px var(--blue-glow);
   }
 
-  .settings-grid {
-    grid-template-columns: repeat(5, minmax(0, 1fr));
-    justify-self: stretch;
-    min-width: 0;
-  }
+
+.live-grid {
+  grid-template-columns: 1fr;
+}
+
+.live-grid > *:nth-child(odd),
+.live-grid > *:nth-child(even) {
+  justify-self: center;
+}
+
+.tempo-column {
+  justify-self: center;
+  width: auto;
+}
+
+.tempo-readout {
+  justify-items: center;
+  width: auto;
+}
+
+.effective-label {
+  text-align: center;
+}
+
+.tempo-value {
+  text-align: center;
+}
+
+
+.settings-grid {
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  max-width: 220px;
+  justify-self: center;
+  min-width: 0;
+}
 
   .practice-speed {
     grid-template-columns: 1fr;
