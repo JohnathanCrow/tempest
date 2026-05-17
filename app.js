@@ -223,7 +223,8 @@ function render() {
   els.notes.value                = song.notes;
   els.tempoValue.textContent     = effectiveTempo(song);
   els.effectiveLabel.textContent = tempoLabel(song);
-  els.playToggle.textContent     = isPlaying ? "⏸\uFE0E" : "▶";
+  els.playToggle.textContent     = isPlaying ? "\u258E\u258E" : "\u25B6";
+  els.playToggle.classList.toggle("is-playing", isPlaying);
 
   els.doubleTime.classList.toggle("active", song.doubleTime);
   els.doubleTime.ariaPressed = String(song.doubleTime);
@@ -252,7 +253,7 @@ function renderEmptyState() {
   els.notes.value                = "";
   els.tempoValue.textContent     = "--";
   els.effectiveLabel.textContent = "Setlist empty";
-  els.playToggle.textContent     = "▶";
+  els.playToggle.textContent     = "\u25B6";
   els.beatDisplay.innerHTML      = "";
 
   els.doubleTime.classList.remove("active");
@@ -751,8 +752,14 @@ els.tempoInput.addEventListener("keydown", (event) => {
 });
 els.tempoInput.addEventListener("blur", commitTempoInput);
 
-els.beatsPerBar.addEventListener("input", (event) =>
-  updateSong({ beatsPerBar: clamp(parseInt(event.target.value, 10) || 1, 1, 16) })
+els.beatsPerBar.addEventListener("input", (event) => {
+  if (event.target.value === "") return;
+  const beats = parseInt(event.target.value, 10);
+  if (!Number.isFinite(beats) || beats < 1) return;
+  updateSong({ beatsPerBar: clamp(beats, 1, 16) });
+});
+els.beatsPerBar.addEventListener("blur", () =>
+  updateSong({ beatsPerBar: clamp(parseInt(els.beatsPerBar.value, 10) || 1, 1, 16) })
 );
 
 els.beatValue.addEventListener("input", (event) => {
@@ -881,6 +888,15 @@ els.clearSongs.addEventListener("click", () => {
 document.querySelectorAll("[data-sort]").forEach((button) =>
   button.addEventListener("click", () => sortSongs(button.dataset.sort))
 );
+
+
+/* ============================================================
+   EVENT LISTENERS — INPUT AUTO-SELECT
+   ============================================================ */
+
+document.querySelectorAll("input[type='number']").forEach((input) => {
+  input.addEventListener("focus", () => input.select());
+});
 
 
 /* ============================================================
