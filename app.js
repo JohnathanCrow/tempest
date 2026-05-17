@@ -368,6 +368,7 @@ function setEditorDisabled(disabled) {
 	[
 		els.songName, els.capo,
 		els.beatFrequency, els.accentFrequency,
+		els.timeSignature, els.subdivision, els.subdivisionFrequency,
 		els.doubleTime, els.notes,
 		els.tapTempo, els.playToggle,
 		els.previousSong, els.nextSong,
