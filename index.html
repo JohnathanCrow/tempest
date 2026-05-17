@@ -1,141 +1,129 @@
 <!DOCTYPE html>
 <html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="theme-color" content="#050607">
-    <meta name="description" content="Offline set-list metronome for song tempos, time signatures, accents, capo positions, and notes.">
-    <title>Tempest</title>
-    <link rel="manifest" href="manifest.webmanifest">
-    <link rel="icon" href="icons/icon.svg" type="image/svg+xml">
-    <link class="apple-touch-icon" href="icons/icon-192.png">
-    <link rel="stylesheet" href="styles.css">
-  </head>
-  <body>
-    <main class="app-shell">
-
-      <!-- Navigation Tabs -->
-      <nav class="panel-tabs" aria-label="Panel tabs">
-        <button class="panel-tab active" data-tab="control" type="button">Control</button>
-        <button class="panel-tab" data-tab="notes" type="button">Notes</button>
-        <button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
-      </nav>
-
-      <!-- Metronome Stage -->
-      <section class="stage" aria-label="Metronome">
-        <section class="sticky-console">
-          <div class="stage-main">
-
-            <!-- Song Header -->
-			<div class="freemode-bar">
-				<button id="freeModeToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⊡</button>
-				<button id="flashToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⚡</button>
-				<button id="addSongControl" class="add-song-control" type="button" aria-label="Add song">✚</button>
-			</div>
-            <header class="song-header">
-              <textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="Song Title"></textarea>
-            </header>
-
-            <!-- Live Metronome Controls -->
-            <section class="live-grid" aria-label="Live metronome controls">
-              <section class="tempo-column">
-                <section class="tempo-readout">
-                  <div id="effectiveLabel" class="effective-label">Stored tempo</div>
-                  <div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
-                </section>
-              </section>
-
-              <!-- Settings Configuration -->
-<section class="settings-grid">
-  <label>
-    <span>Capo</span>
-    <input id="capo" type="number" min="0" max="16" aria-label="Capo position">
-  </label>
-  <label>
-    <span>Time</span>
-    <input id="timeSignature" type="text" maxlength="3" aria-label="Time signature" placeholder="4/4">
-  </label>
-  <label>
-    <span>Sub</span>
-    <input id="subdivision" type="number" min="1" max="16" aria-label="Subdivision">
-  </label>
-  <label>
-    <span>Freq</span>
-    <input id="beatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
-  </label>
-  <label>
-    <span>A. Freq</span>
-    <input id="accentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
-  </label>
-  <label>
-    <span>S. Freq</span>
-    <input id="subdivisionFrequency" type="number" min="1" max="4000" aria-label="Subdivision frequency">
-  </label>
-  <div class="settings-actions">
-    <span aria-hidden="true">&nbsp;</span>
-    <button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double</button>
-  </div>
-  <div class="settings-actions">
-    <span aria-hidden="true">&nbsp;</span>
-    <button id="swingToggle" class="plain-button toggle-button" type="button" aria-pressed="false">Swing</button>
-  </div>
-  <div class="settings-actions">
-    <span aria-hidden="true">&nbsp;</span>
-    <button id="tapTempo" class="plain-button" type="button">Tap</button>
-  </div>
-</section>
-            </section>
-
-            <!-- Practice Speed Controls -->
-<section class="practice-speed" aria-label="Temporary tempo adjustment">
-  <div class="practice-speed-label">MOD</div>
-  <input id="practiceSpeed" type="range" min="-50" max="50" step="5" value="0" aria-label="Practice speed">
-  <div id="practiceSpeedLabel" class="practice-speed-label">0%</div>
-</section>
-
-            <!-- Playback Transport -->
-            <section class="transport">
-              <button id="previousSong" type="button" aria-label="Previous song">◀◀</button>
-              <button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
-              <button id="nextSong" type="button" aria-label="Next song">▶▶</button>
-            </section>
-            <div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
-          </div>
-
-          <!-- Notes Panel Dropdown -->
-          <section class="notes-panel" data-panel="notes">
-            <label for="notes">Notes</label>
-            <textarea id="notes" rows="24" placeholder="..."></textarea>
-          </section>
-
-        </section>
-        <div class="stage-spacer" aria-hidden="true"></div>
-      </section>
-
-      <!-- Sidebar Set List Management -->
-      <aside class="set-list" aria-label="Set list">
-        <div class="set-actions-top">
-          <button id="addSong" class="add-button" type="button" aria-label="Add song">New</button>
-        </div>
-        <div class="set-actions">
-          <button id="addDivider" type="button" aria-label="Add divider">Div</button>
-		  <button id="exportSongs" type="button">Export</button>
-          <button id="replaceSongs" type="button">Import</button>
-          <button id="mergeSongs" type="button">Merge</button>
-          <button id="clearSongs" type="button">Clear</button>
-          <input id="importFile" type="file" accept="application/json" hidden>
-        </div>
-        <div class="sort-actions">
-          <button data-sort="custom" type="button">Custom</button>
-          <button data-sort="name" type="button">A-Z</button>
-          <button data-sort="tempo" type="button">BPM</button>
-          <button data-sort="capo" type="button">Capo</button>
-        </div>
-        <div id="songsList" class="songs"></div>
-      </aside>
-
-    </main>
-
-    <script src="app.js"></script>
-  </body>
+	<head>
+		<meta charset="utf-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1">
+		<meta name="theme-color" content="#050607">
+		<meta name="description" content="Offline set-list metronome for song tempos, time signatures, accents, capo positions, and notes.">
+		<title>Tempest</title>
+		<link rel="manifest" href="manifest.webmanifest">
+		<link rel="icon" href="icons/icon.svg" type="image/svg+xml">
+		<link class="apple-touch-icon" href="icons/icon-192.png">
+		<link rel="stylesheet" href="styles.css">
+	</head>
+	<body>
+		<main class="app-shell">
+			<!-- Navigation Tabs -->
+			<nav class="panel-tabs" aria-label="Panel tabs">
+				<button class="panel-tab active" data-tab="control" type="button">Control</button>
+				<button class="panel-tab" data-tab="notes" type="button">Notes</button>
+				<button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
+			</nav>
+			<!-- Metronome Stage -->
+			<section class="stage" aria-label="Metronome">
+				<section class="sticky-console">
+					<div class="stage-main">
+						<!-- Song Header -->
+						<div class="freemode-bar">
+							<button id="freeModeToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⊡</button>
+							<button id="flashToggle" class="plain-button toggle-button" type="button" aria-pressed="false">✦</button>
+							<button id="addSongControl" class="add-song-control" type="button" aria-label="Add song">✚</button>
+						</div>
+						<header class="song-header">
+							<textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="Song Title"></textarea>
+						</header>
+						<!-- Live Metronome Controls -->
+						<section class="live-grid" aria-label="Live metronome controls">
+							<section class="tempo-column">
+								<section class="tempo-readout">
+									<div id="effectiveLabel" class="effective-label">Stored tempo</div>
+									<div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
+								</section>
+							</section>
+							<!-- Settings Configuration -->
+							<section class="settings-grid">
+								<label>
+								<span>Capo</span>
+								<input id="capo" type="number" min="0" max="16" aria-label="Capo position">
+								</label>
+								<label>
+								<span>Time</span>
+								<input id="timeSignature" type="text" maxlength="3" aria-label="Time signature" placeholder="4/4">
+								</label>
+								<label>
+								<span>Sub</span>
+								<input id="subdivision" type="number" min="1" max="16" aria-label="Subdivision">
+								</label>
+								<label>
+								<span>Freq</span>
+								<input id="beatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
+								</label>
+								<label>
+								<span>A. Freq</span>
+								<input id="accentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
+								</label>
+								<label>
+								<span>S. Freq</span>
+								<input id="subdivisionFrequency" type="number" min="1" max="4000" aria-label="Subdivision frequency">
+								</label>
+								<div class="settings-actions">
+									<span aria-hidden="true">&nbsp;</span>
+									<button id="doubleTime" class="plain-button toggle-button" type="button" aria-pressed="false">Double</button>
+								</div>
+								<div class="settings-actions">
+									<span aria-hidden="true">&nbsp;</span>
+									<button id="swingToggle" class="plain-button toggle-button" type="button" aria-pressed="false">Swing</button>
+								</div>
+								<div class="settings-actions">
+									<span aria-hidden="true">&nbsp;</span>
+									<button id="tapTempo" class="plain-button" type="button">Tap</button>
+								</div>
+							</section>
+						</section>
+						<!-- Practice Speed Controls -->
+						<section class="practice-speed" aria-label="Temporary tempo adjustment">
+							<div class="practice-speed-label">MOD</div>
+							<input id="practiceSpeed" type="range" min="-50" max="50" step="5" value="0" aria-label="Practice speed">
+							<div id="practiceSpeedLabel" class="practice-speed-label">0%</div>
+						</section>
+						<!-- Playback Transport -->
+						<section class="transport">
+							<button id="previousSong" type="button" aria-label="Previous song">◀◀</button>
+							<button id="playToggle" class="play-button" type="button" aria-label="Play metronome">▶</button>
+							<button id="nextSong" type="button" aria-label="Next song">▶▶</button>
+						</section>
+						<div id="beatDisplay" class="beat-display" aria-label="Beats in bar"></div>
+					</div>
+					<!-- Notes Panel Dropdown -->
+					<section class="notes-panel" data-panel="notes">
+						<label for="notes">Notes</label>
+						<textarea id="notes" rows="24" placeholder="..."></textarea>
+					</section>
+				</section>
+				<div class="stage-spacer" aria-hidden="true"></div>
+			</section>
+			<!-- Sidebar Set List Management -->
+			<aside class="set-list" aria-label="Set list">
+				<div class="set-actions-top">
+					<button id="addSong" class="add-button" type="button" aria-label="Add song">New</button>
+				</div>
+				<div class="set-actions">
+					<button id="addDivider" type="button" aria-label="Add divider">Div</button>
+					<button id="exportSongs" type="button">Export</button>
+					<button id="replaceSongs" type="button">Import</button>
+					<button id="mergeSongs" type="button">Merge</button>
+					<button id="clearSongs" type="button">Clear</button>
+					<input id="importFile" type="file" accept="application/json" hidden>
+				</div>
+				<div class="sort-actions">
+					<button data-sort="custom" type="button">Custom</button>
+					<button data-sort="name" type="button">A-Z</button>
+					<button data-sort="tempo" type="button">BPM</button>
+					<button data-sort="capo" type="button">Capo</button>
+				</div>
+				<div id="songsList" class="songs"></div>
+			</aside>
+		</main>
+		<script src="app.js"></script>
+	</body>
 </html>
