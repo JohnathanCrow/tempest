@@ -3,6 +3,25 @@
    ============================================================ */
 
 const STORAGE_KEY = "set-click-metronome-v2";
+const FREE_SONG_KEY = "tempest-freesong-v1";
+const FREE_MODE_KEY = "tempest-freemode-v1";
+const FLASH_KEY = "tempest-flash-v1";
+
+const DEFAULT_FREE_SONG = {
+  id:                   "free",
+  name:                 "Free Mode",
+  tempo:                100,
+  beatFrequency:        1000,
+  accentFrequency:      800,
+  subdivisionFrequency: 1200,
+  capo:                 0,
+  beatsPerBar:          4,
+  beatValue:            4,
+  subdivision:          1,
+  doubleTime:           false,
+  notes:                "",
+  accents:              [],
+};
 const EMPTY_STATE = { songs: [], items: [], selectedId: null };
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
@@ -13,6 +32,9 @@ let sortMode = "custom";
 let sortedViewIds = [];
 let tempSpeed = 0;
 let importMode = "replace";
+let freeSong = loadFreeSong();
+let freeMode = localStorage.getItem(FREE_MODE_KEY) === "true";
+let flashEnabled = localStorage.getItem(FLASH_KEY) === "true";
 
 
 /* ============================================================
@@ -90,6 +112,17 @@ function saveState() {
     items: state.items,
     selectedId,
   }));
+  localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
+  localStorage.setItem(FREE_MODE_KEY, String(freeMode));
+  localStorage.setItem(FLASH_KEY, String(flashEnabled));
+}
+
+function loadFreeSong() {
+  try {
+    const saved = JSON.parse(localStorage.getItem(FREE_SONG_KEY));
+    if (saved) return { ...DEFAULT_FREE_SONG, ...saved };
+  } catch {}
+  return { ...DEFAULT_FREE_SONG };
 }
 
 function normalizeState(raw) {
@@ -152,6 +185,7 @@ function clamp(value, min, max) {
 }
 
 function selectedSong() {
+  if (freeMode) return freeSong;
   return state.songs.find((song) => song.id === selectedId) || state.songs[0] || null;
 }
 
@@ -225,6 +259,22 @@ function render() {
   els.effectiveLabel.textContent = tempoLabel(song);
   els.playToggle.textContent     = isPlaying ? "\u258E\u258E" : "\u25B6";
   els.playToggle.classList.toggle("is-playing", isPlaying);
+  
+  const freeModeToggle = document.querySelector("#freeModeToggle");
+  if (freeModeToggle) {
+    freeModeToggle.classList.toggle("active", freeMode);
+    freeModeToggle.ariaPressed = String(freeMode);
+  }
+  
+  const flashToggle = document.querySelector("#flashToggle");
+	if (flashToggle) {
+	  flashToggle.classList.toggle("active", flashEnabled);
+	  flashToggle.ariaPressed = String(flashEnabled);
+	}
+
+  els.previousSong.disabled = freeMode;
+  els.nextSong.disabled = freeMode;
+  els.songName.readOnly = freeMode;
 
   els.doubleTime.classList.toggle("active", song.doubleTime);
   els.doubleTime.ariaPressed = String(song.doubleTime);
@@ -419,6 +469,11 @@ function renderSongMeta(container, song) {
    ============================================================ */
 
 function updateSong(patch) {
+  if (freeMode) {
+    Object.assign(freeSong, patch);
+    render();
+    return;
+  }
   const song = selectedSong();
   if (!song) return;
   Object.assign(song, patch);
@@ -428,8 +483,28 @@ function updateSong(patch) {
   render();
 }
 
+function toggleFreeMode() {
+  freeMode = !freeMode;
+  if (!freeMode && !selectedSong()) selectedId = state.songs[0]?.id || null;
+  tempSpeed = 0;
+  currentBeat = -1;
+  if (isPlaying) restartClock();
+  render();
+}
+
+function toggleFlash() {
+  flashEnabled = !flashEnabled;
+  const flashToggle = document.querySelector("#flashToggle");
+  if (flashToggle) {
+    flashToggle.classList.toggle("active", flashEnabled);
+    flashToggle.ariaPressed = String(flashEnabled);
+  }
+  saveState();
+}
+
 function chooseSong(id) {
   if (!id) return;
+  freeMode = false;
   selectedId = id;
   tempSpeed = 0;
   currentBeat = -1;
@@ -614,15 +689,25 @@ function scheduleSubClick(time, song) {
   oscillator.stop(time + 0.06);
 }
 
+function triggerFlash(accented) {
+  if (!flashEnabled) return;
+  const stage = document.querySelector(".sticky-console");
+  if (!stage) return;
+  stage.classList.remove("flash-beat", "flash-accent");
+  void stage.offsetWidth;
+  stage.classList.add(accented ? "flash-accent" : "flash-beat");
+}
+
 function scheduleBeat(beatIndex, time) {
   const song = selectedSong();
   if (!song) return;
   playClick(song.accents.includes(beatIndex), time, song);
-  window.setTimeout(() => {
-    if (!isPlaying || selectedSong()?.id !== song.id) return;
-    currentBeat = beatIndex;
-    renderBeats(song);
-  }, Math.max(0, (time - ensureAudioContext().currentTime) * 1000));
+	window.setTimeout(() => {
+	  if (!isPlaying || selectedSong()?.id !== song.id) return;
+	  currentBeat = beatIndex;
+	  triggerFlash(song.accents.includes(beatIndex));
+	  renderBeats(song);
+	}, Math.max(0, (time - ensureAudioContext().currentTime) * 1000));
 }
 
 function schedulerTick() {
@@ -814,6 +899,9 @@ els.doubleTime.addEventListener("click", () => {
   updateSong({ doubleTime: !song.doubleTime });
 });
 
+document.querySelector("#freeModeToggle").addEventListener("click", toggleFreeMode);
+document.querySelector("#flashToggle").addEventListener("click", toggleFlash);
+
 els.notes.addEventListener("input", (event) => updateSong({ notes: event.target.value }));
 
 
@@ -864,6 +952,7 @@ document.querySelectorAll("[data-speed]").forEach((button) => {
    ============================================================ */
 
 els.addSong.addEventListener("click", addSong);
+document.querySelector("#addSongControl").addEventListener("click", addSong);
 els.addDivider.addEventListener("click", addDivider);
 els.exportSongs.addEventListener("click", exportSongs);
 
@@ -876,6 +965,7 @@ els.importFile.addEventListener("change", (event) => {
 });
 
 els.clearSongs.addEventListener("click", () => {
+  if (!confirm("Clear the entire setlist?")) return;
   state = normalizeState(EMPTY_STATE);
   selectedId = state.selectedId;
   sortMode = "custom";
