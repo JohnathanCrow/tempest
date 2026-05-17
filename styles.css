@@ -409,10 +409,10 @@ label span,
 .notes-panel textarea {
   width: 100%;
   resize: vertical;
-  min-height: 92px;
+  min-height: 363px;
   max-height: 736px;
-  margin-top: 1px;
-  border: 0px solid var(--line);
+  margin-top: 10px;
+  border: 1px dashed var(--line);
   border-radius: 6px;
   background: var(--bg);
   color: var(--text);
@@ -452,8 +452,8 @@ label span,
 }
 
 .toggle-button.active {
-  border-color: var(--blue);
-  background: var(--blue-soft);
+  border-color: transparent;
+  background: var(--panel-soft);
   color: var(--blue);
 }
 
@@ -528,9 +528,9 @@ label span,
 }
 
 .sort-actions button.active-sort {
-  border-color: var(--blue);
+  border-color: transparent;
   color: var(--blue);
-  background: var(--blue-soft);
+  background: var(--panel-soft);
 }
 
 .songs {
@@ -568,8 +568,9 @@ label span,
 }
 
 .song-item.active {
-  border-color: var(--blue);
-  background: var(--blue-soft);
+  border-color: transparent;
+  background: var(--panel-soft);
+  color: var(--blue);
 }
 
 .song-item.dragging,
@@ -607,7 +608,7 @@ label span,
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: var(--yellow)
+  background: var(--yellow);
   box-shadow: 0 0 10px rgba(255, 210, 74, .34);
   display: inline-block;
   flex: 0 0 auto;
@@ -658,7 +659,7 @@ label span,
 .plain-button:hover,
 .set-actions button:hover,
 .sort-actions button:hover {
-  background: var(--panel-soft);
+  background: var(--blue-soft);
 }
 
 .plain-button:active,

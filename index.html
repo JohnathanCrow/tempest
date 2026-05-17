@@ -28,7 +28,7 @@
 
             <!-- Song Header -->
             <header class="song-header">
-              <textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="New Song"></textarea>
+              <textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="Song Title"></textarea>
             </header>
 
             <!-- Live Metronome Controls -->
@@ -118,7 +118,7 @@
           <!-- Notes Panel Dropdown -->
           <section class="notes-panel" data-panel="notes">
             <label for="notes">Notes</label>
-            <textarea id="notes" rows="12" placeholder="..."></textarea>
+            <textarea id="notes" rows="24" placeholder="..."></textarea>
           </section>
 
         </section>
@@ -132,9 +132,9 @@
         </div>
         <div class="set-actions">
           <button id="addDivider" type="button" aria-label="Add divider">Div</button>
+		  <button id="exportSongs" type="button">Export</button>
           <button id="replaceSongs" type="button">Import</button>
           <button id="mergeSongs" type="button">Merge</button>
-          <button id="exportSongs" type="button">Export</button>
           <button id="clearSongs" type="button">Clear</button>
           <input id="importFile" type="file" accept="application/json" hidden>
         </div>

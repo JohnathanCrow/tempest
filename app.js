@@ -251,7 +251,7 @@ function renderEmptyState() {
   els.subdivisionFrequency.value = "";
   els.notes.value                = "";
   els.tempoValue.textContent     = "--";
-  els.effectiveLabel.textContent = "Add a song";
+  els.effectiveLabel.textContent = "Setlist empty";
   els.playToggle.textContent     = "▶";
   els.beatDisplay.innerHTML      = "";
 
