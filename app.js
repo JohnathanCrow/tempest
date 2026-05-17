@@ -936,7 +936,12 @@ els.tempoValue.addEventListener("keydown", (event) => {
 	if (event.key === "Enter") {
 		event.preventDefault();
 		event.target.blur();
+		return;
 	}
+	const allowed = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
+	if (allowed.includes(event.key)) return;
+	if (!/^\d$/.test(event.key)) { event.preventDefault(); return; }
+	if (event.target.textContent.replace(/\D/g, "").length >= 3) event.preventDefault();
 });
 els.tempoValue.addEventListener("focus", () => {
 	isEditingTempo = true;
@@ -948,6 +953,13 @@ els.tempoValue.addEventListener("blur", () => {
 	updateSong({
 		tempo: clamp(parseInt(els.tempoValue.textContent, 10) || 1, 1, 400)
 	});
+});
+
+document.querySelector(".live-grid").addEventListener("mousedown", (event) => {
+	if (!event.target.closest(".tempo-column") &&
+		!event.target.closest("input, button, select, textarea")) {
+		event.preventDefault();
+	}
 });
 
 

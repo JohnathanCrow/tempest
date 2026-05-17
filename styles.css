@@ -36,8 +36,9 @@
 
 body {
 	margin: 0;
-	height: 100vh;
-	overflow: hidden;
+	height: auto;
+	min-height: 100vh;
+	overflow: auto;
 	background: var(--bg);
 	color: var(--text);
 	font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
@@ -108,14 +109,13 @@ textarea:disabled {
 
 .stage,
 .set-list {
-	/* border: 1px solid var(--line); */
 	background: linear-gradient(180deg, var(--panel) 0%, var(--bg) 100%);
 	border-radius: 6px;
 }
 
 .stage {
 	position: relative;
-	overflow: hidden;
+
 }
 
 .stage-spacer {
@@ -128,7 +128,7 @@ textarea:disabled {
 	display: grid;
 	gap: 14px;
 	padding: clamp(18px, 2.6vw, 28px);
-	height: 100%;
+	padding-right: calc(clamp(18px, 2.6vw, 28px) + 6px);
 	align-content: start;
 	border-radius: 6px;
 }
@@ -148,15 +148,13 @@ textarea:disabled {
 
 .panel-tab {
 	padding: 6px 18px;
-	/* border: 1px solid var(--line);
-  border-bottom: none;
-  border-radius: 6px 6px 0 0; */
 	border: none;
 	background: var(--panel-soft);
 	color: var(--muted);
-	font-size: .85rem;
+	font-size: .76rem;
 	font-weight: 700;
-	letter-spacing: .04em;
+	letter-spacing: .08em;
+	text-transform: uppercase;
 	cursor: pointer;
 	position: relative;
 	bottom: -1px;
@@ -303,20 +301,20 @@ textarea:disabled {
 	display: grid;
 	gap: 10px;
 	min-width: 0;
-	width: 220px;
-	height: 140px;
+	width: 320px;
+	height: 165px;
 }
 
 .tempo-readout {
 	display: grid;
 	justify-items: start;
-	gap: 0;
-	width: 220px;
-	height: 140px;
+	gap: 0px;
+	width: 330px;
+	height: 160px;
 }
 
 label span,
-.effective-label,
+.effective-label,.effective-label,
 .notes-panel label,
 .settings-actions span {
 	display: block;
@@ -329,17 +327,16 @@ label span,
 
 .tempo-value {
 	color: var(--blue);
-	font-size: 10rem;
+	font-size: 13rem;
 	line-height: .72;
 	font-weight: 760;
 	font-variant-numeric: tabular-nums;
 	text-shadow: 0 0 12px var(--blue-glow);
-	margin-top: 4px;
-	` width: 100%;
+	padding-bottom: 30px;
+	width: 100%;
 	background: transparent;
 	border: 0;
 	outline: none;
-	padding: 0;
 	display: block;
 	overflow: hidden;
 }
@@ -357,29 +354,28 @@ label span,
 .settings-grid {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
-	max-width: 220px;
-	gap: 10px 12px;
+	max-width: 240px;
+	gap: 6px 10px;
 	align-items: start;
-	padding-top: 2px;
 	justify-self: end;
 }
 
 .settings-grid label {
 	display: grid;
-	grid-template-rows: 18px 38px;
+	grid-template-rows: 14px 32px;
 	gap: 4px;
 }
 
 .settings-actions {
 	display: grid;
-	grid-template-rows: 18px 38px;
-	gap: 4px;
+	grid-template-rows: 14px 38px;
+	gap: 0px;
 	min-width: 0;
 }
 
 .settings-grid input {
 	width: 100%;
-	height: 38px;
+	height: 30px;
 	color: var(--text);
 	font-size: 1rem;
 	outline: none;
@@ -492,8 +488,11 @@ label span,
 
 .practice-speed-label {
 	color: var(--muted);
-	font-size: .85rem;
+	font-size: .76rem;
 	font-variant-numeric: tabular-nums;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .08em;
 	min-width: 40px;
 	text-align: right;
 	margin-right: 12px;
@@ -507,6 +506,7 @@ label span,
 .notes-panel textarea {
 	width: 100%;
 	resize: vertical;
+	height: 363px;
 	min-height: 363px;
 	max-height: 736px;
 	margin-top: 10px;
@@ -525,10 +525,21 @@ label span,
 
 .plain-button,
 .set-actions button,
-.sort-actions button,
-.practice-speed button,
-.transport button,
-.play-button {
+.sort-actions button{
+	display: block;
+	min-height: 38px;
+	border: 1px solid var(--line);
+	border-radius: 6px;
+	background: transparent;
+	color: var(--text);
+	font-size: .76rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: .08em;
+}
+
+.play-button,
+.transport button{
 	min-height: 38px;
 	border: 1px solid var(--line);
 	border-radius: 6px;
@@ -540,9 +551,6 @@ label span,
 	border: 0;
 }
 
-.practice-speed button {
-	border: 0;
-}
 
 .add-button {
 	border-color: var(--blue);
@@ -595,7 +603,6 @@ label span,
 .sort-actions button {
 	min-width: 0;
 	padding: 0 10px;
-	font-size: 1rem;
 }
 
 .set-actions #addDivider {
@@ -763,7 +770,6 @@ label span,
 .plain-button:active,
 .set-actions button:active,
 .sort-actions button:active,
-.practice-speed button:active,
 .transport button:active {
 	opacity: .7;
 }
@@ -783,10 +789,6 @@ label span,
 	text-shadow: 0 0 12px var(--blue-glow);
 }
 
-.practice-speed button:hover {
-	color: var(--text);
-	filter: brightness(1.4);
-}
 
 .delete-song:hover {
 	color: var(--danger);
@@ -862,9 +864,6 @@ label span,
 		justify-self: end;
 	}
 
-	.practice-speed {
-		justify-content: center;
-	}
 
 	.set-actions button,
 	.sort-actions button {
@@ -890,7 +889,7 @@ label span,
 	}
 
 	.tempo-readout {
-		height: 100px;
+		height: 110px;
 		overflow: hidden;
 	}
 
@@ -899,8 +898,8 @@ label span,
 	}
 
 	.tempo-value {
-		font-size: 7rem;
-		height: 100px;
+		font-size: 8rem;
+		height: 110px;
 		text-shadow: 0 0 6px var(--blue-glow);
 	}
 
@@ -940,17 +939,10 @@ label span,
 		min-width: 0;
 	}
 
-	.practice-speed {
-		grid-template-columns: 1fr;
-		justify-content: center;
-	}
 
 	.practice-speed-zero {
 		width: 100%;
 	}
 
-	.settings-grid input {
-		font-size: 0.9rem;
-	}
 
 }
