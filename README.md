@@ -2,7 +2,7 @@
 
 ![screenshot_home](https://github.com/JohnathanCrow/tempest/blob/main/screenshot.png)
 
-A metronome app with setlist features, designed for musicians who want to organize, practice, and perform sets with customizable tempo controls and per-song settings.
+A metronome app with setlist features, designed for musicians who want to organize, practice, and perform sets with customizable tempo controls and per-song settings. Scales for small screens.
 
 ## Installation
 
@@ -54,3 +54,9 @@ A metronome app with setlist features, designed for musicians who want to organi
 - Notes
 	- Add notes, cues, chord changes, or practice reminders for each song
 	- Songs containing notes display a yellow dot in the right panel setlist for quick reference
+
+#### Misc
+
+- Scaling
+    - Narrow view moves setlist to a new tab
+    - Mobile view moves setlist and notes to new tabs
