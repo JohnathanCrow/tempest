@@ -312,7 +312,7 @@ textarea:disabled {
 }
 
 label span,
-.effective-label,.effective-label,
+.effective-label,
 .notes-panel label,
 .settings-actions span {
 	display: block;
@@ -543,10 +543,6 @@ label span,
 	border-radius: 6px;
 	background: transparent;
 	color: var(--text);
-}
-
-.transport button {
-	border: 0;
 }
 
 
@@ -782,7 +778,7 @@ label span,
     flex: 1;
     min-width: 0;
     height: 38px;
-    border: 1px solid var(--line);
+    border: 0px solid var(--line);
     border-radius: 6px;
     background: var(--bg);
     color: var(--text);

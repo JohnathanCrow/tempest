@@ -7,27 +7,32 @@ const FREE_SONG_KEY = "tempest-freesong-v1";
 const FREE_MODE_KEY = "tempest-freemode-v1";
 const FLASH_KEY = "tempest-flash-v1";
 
-const DEFAULT_FREE_SONG = {
-	id: "free",
-	name: "Free Mode",
-	tempo: 100,
-	beatFrequency: 1000,
-	accentFrequency: 800,
-	subdivisionFrequency: 1200,
-	capo: 0,
-	beatsPerBar: 4,
-	beatValue: 4,
-	subdivision: 1,
-	doubleTime: false,
-	swing: 0,
-	notes: "",
-	accents: [],
-};
+function createSong(overrides = {}) {
+	return {
+		id: crypto.randomUUID(),
+		name: "Untitled Song",
+		tempo: 100,
+		beatFrequency: 1000,
+		accentFrequency: 800,
+		subdivisionFrequency: 1200,
+		capo: 0,
+		beatsPerBar: 4,
+		beatValue: 4,
+		subdivision: 1,
+		doubleTime: false,
+		swing: 0,
+		notes: "",
+		accents: [],
+		...overrides
+	};
+}
+
+const DEFAULT_FREE_SONG = createSong({ id: "free", name: "Free Mode" });
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 
 let state = loadState();
-let selectedId = activeSetlist()?.selectedId || null;
+let selectedId = activeSetlist().songs[0]?.id || null;
 let sortMode = "custom";
 let sortedViewIds = [];
 let tempSpeed = 0;
@@ -57,6 +62,7 @@ let tapTimes = [];
 
 let draggedItemId = null;
 let isEditingTempo = false;
+let beatElements = [];
 
 
 /* ============================================================
@@ -138,22 +144,23 @@ function activeSetlist() {
 }
 
 function normalizeSetlist(raw) {
+	const defaults = createSong();
     const songs = (raw.songs || []).map((song) => ({
-        id: song.id || crypto.randomUUID(),
-        name: song.name || "Untitled Song",
-        tempo: clamp(parseInt(song.tempo, 10) || 100, 1, 400),
-        beatFrequency: clamp(parseInt(song.beatFrequency, 10) || 1000, 1, 4000),
-        accentFrequency: clamp(parseInt(song.accentFrequency, 10) || 800, 1, 4000),
-        subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || 1200, 1, 4000),
-        capo: clamp(parseInt(song.capo, 10) || 0, 0, 12),
-        beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || 4, 1, 24),
-        beatValue: clamp(parseInt(song.beatValue, 10) || 4, 1, 64),
-        subdivision: clamp(parseInt(song.subdivision, 10) || 1, 1, 8),
-        doubleTime: Boolean(song.doubleTime),
-        swing: clamp(parseInt(song.swing, 10) || 0, 0, 3),
-        notes: song.notes || "",
-        accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : [],
-    }));
+		id: song.id || defaults.id,
+		name: song.name || defaults.name,
+		tempo: clamp(parseInt(song.tempo, 10) || defaults.tempo, 1, 400),
+		beatFrequency: clamp(parseInt(song.beatFrequency, 10) || defaults.beatFrequency, 1, 4000),
+		accentFrequency: clamp(parseInt(song.accentFrequency, 10) || defaults.accentFrequency, 1, 4000),
+		subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || defaults.subdivisionFrequency, 1, 4000),
+		capo: clamp(parseInt(song.capo, 10) || defaults.capo, 0, 12),
+		beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || defaults.beatsPerBar, 1, 24),
+		beatValue: clamp(parseInt(song.beatValue, 10) || defaults.beatValue, 1, 64),
+		subdivision: clamp(parseInt(song.subdivision, 10) || defaults.subdivision, 1, 8),
+		doubleTime: Boolean(song.doubleTime),
+		swing: clamp(parseInt(song.swing, 10) || defaults.swing, 0, 3),
+		notes: song.notes || defaults.notes,
+		accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : defaults.accents,
+	}));
 
     const songIds = new Set(songs.map((song) => song.id));
     const rawItems = Array.isArray(raw.items) ?
@@ -173,10 +180,7 @@ function normalizeSetlist(raw) {
         if (!seenSongs.has(song.id)) items.push({ type: "song", id: song.id, songId: song.id });
     });
 
-    const selectedId = songs.some((song) => song.id === raw.selectedId) ?
-        raw.selectedId : songs[0]?.id || null;
-
-    return { songs, items, selectedId };
+    return { songs, items };
 }
 
 /* ============================================================
@@ -306,7 +310,6 @@ function render() {
 
 	renderBeats(song);
 	renderSongs(song);
-	saveState();
 }
 
 function renderEmptyState() {
@@ -355,9 +358,14 @@ function setEditorDisabled(disabled) {
 }
 
 function renderBeats(song) {
-	const validAccents = new Set(song.accents.filter((beat) => beat < song.beatsPerBar));
+	const validAccents = new Set(
+		song.accents.filter((beat) => beat < song.beatsPerBar)
+	);
+
 	song.accents = [...validAccents].sort((a, b) => a - b);
+
 	els.beatDisplay.innerHTML = "";
+	beatElements = [];
 
 	if (els.timeSignature && !isEditingTempo) {
 		els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
@@ -365,16 +373,34 @@ function renderBeats(song) {
 
 	for (let index = 0; index < song.beatsPerBar; index += 1) {
 		const button = document.createElement("button");
+
 		button.type = "button";
 		button.className = "beat";
 		button.textContent = index + 1;
 		button.dataset.beat = index;
-		button.ariaLabel = `Beat ${index + 1}${song.accents.includes(index) ? " accented" : ""}`;
-		button.classList.toggle("accent", song.accents.includes(index));
-		button.classList.toggle("current", index === currentBeat);
+
+		button.ariaLabel =
+			`Beat ${index + 1}${song.accents.includes(index) ? " accented" : ""}`;
+
+		if (song.accents.includes(index)) {
+			button.classList.add("accent");
+		}
+
+		if (index === currentBeat) {
+			button.classList.add("current");
+		}
+
 		button.addEventListener("click", () => toggleAccent(index));
+
+		beatElements.push(button);
 		els.beatDisplay.append(button);
 	}
+}
+
+function updateCurrentBeatDisplay() {
+	beatElements.forEach((button, index) => {
+		button.classList.toggle("current", index === currentBeat);
+	});
 }
 
 function renderSongs(activeSong) {
@@ -539,6 +565,7 @@ function cycleSwing() {
 	updateSong({
 		swing: ((song.swing || 0) + 1) % 4
 	});
+	saveState();
 }
 
 function chooseSong(id) {
@@ -549,6 +576,7 @@ function chooseSong(id) {
 	currentBeat = -1;
 	if (isPlaying) restartClock();
 	render();
+	saveState();
 }
 
 function toggleAccent(beat) {
@@ -558,30 +586,17 @@ function toggleAccent(beat) {
 		song.accents.filter((item) => item !== beat) :
 		[...song.accents, beat].sort((a, b) => a - b);
 	render();
+	saveState();
 }
 
 function addSong() {
-    const song = {
-        id: crypto.randomUUID(),
-        name: "",
-        tempo: 100,
-        beatFrequency: 1000,
-        accentFrequency: 800,
-        subdivisionFrequency: 1200,
-        capo: 0,
-        beatsPerBar: 4,
-        beatValue: 4,
-        subdivision: 1,
-        doubleTime: false,
-        swing: 0,
-        notes: "",
-        accents: [],
-    };
+    const song = createSong();
     activeSetlist().songs.push(song);
     activeSetlist().items.push({ type: "song", id: song.id, songId: song.id });
     sortMode = "custom";
     sortedViewIds = [];
     chooseSong(song.id);
+	saveState();
 }
 
 function addDivider() {
@@ -590,6 +605,7 @@ function addDivider() {
     sortMode = "custom";
     sortedViewIds = [];
     render();
+	saveState();
 }
 
 function deleteSong(id) {
@@ -607,11 +623,13 @@ function deleteSong(id) {
         stopClock();
     }
     render();
+	saveState();
 }
 
 function deleteDivider(id) {
     activeSetlist().items = activeSetlist().items.filter((item) => item.id !== id);
     render();
+	saveState();
 }
 
 function moveItem(sourceId, targetId) {
@@ -632,6 +650,7 @@ function moveItem(sourceId, targetId) {
     const [item] = items.splice(sourceIndex, 1);
     items.splice(targetIndex, 0, item);
     render();
+	saveState();
 }
 
 function sortSongs(mode) {
@@ -668,6 +687,7 @@ function deleteSetlist() {
     tempSpeed = 0;
     stopClock();
     render();
+	saveState();
 }
 
 function renameSetlist() {
@@ -676,17 +696,19 @@ function renameSetlist() {
     if (!name || name.trim() === sl.name) return;
     sl.name = name.trim();
     render();
+	saveState();
 }
 
 function switchSetlist(id) {
     if (id === state.activeSetlistId) return;
     state.activeSetlistId = id;
-    selectedId = activeSetlist().selectedId || null;
+    selectedId = activeSetlist().songs[0]?.id || null;
     sortMode = "custom";
     sortedViewIds = [];
     tempSpeed = 0;
     stopClock();
     render();
+	saveState();
 }
 
 /* ============================================================
@@ -712,8 +734,7 @@ async function replaceSongs(file) {
         const sl = activeSetlist();
         sl.songs = imported.songs;
         sl.items = imported.items;
-        sl.selectedId = imported.selectedId;
-        selectedId = imported.selectedId;
+		selectedId = imported.songs[0]?.id || null;
         sortMode = "custom";
         sortedViewIds = [];
         tempSpeed = 0;
@@ -722,6 +743,7 @@ async function replaceSongs(file) {
     } catch {
         alert("Failed to import file.");
     }
+	saveState();
 }
 
 async function mergeSongs(file) {
@@ -740,6 +762,7 @@ async function mergeSongs(file) {
     } catch {
         alert("Failed to import file.");
     }
+	saveState();
 }
 
 
@@ -799,7 +822,7 @@ function scheduleBeat(beatIndex, time) {
 		if (!isPlaying || selectedSong()?.id !== song.id) return;
 		currentBeat = beatIndex;
 		triggerFlash(song.accents.includes(beatIndex));
-		renderBeats(song);
+		updateCurrentBeatDisplay();
 	}, Math.max(0, (time - ensureAudioContext().currentTime) * 1000));
 }
 
@@ -845,7 +868,8 @@ function stopClock() {
 	if (masterGain) {
 		masterGain.gain.cancelScheduledValues(audioContext.currentTime);
 		masterGain.gain.setValueAtTime(0, audioContext.currentTime);
-		masterGain.gain.setValueAtTime(1, audioContext.currentTime + 0.08);
+		masterGain.gain.cancelScheduledValues(audioContext.currentTime);
+		masterGain.gain.value = 1;
 	}
 	render();
 }
@@ -917,6 +941,7 @@ els.songName.addEventListener("input", (event) =>
 
 els.songName.addEventListener("blur", (event) => {
 	if (!event.target.value.trim()) updateSong({ name: "Untitled Song" });
+	saveState();
 });
 
 els.capo.addEventListener("input", (event) =>
@@ -925,9 +950,16 @@ els.capo.addEventListener("input", (event) =>
 	})
 );
 
+els.capo.addEventListener("blur", () => {
+	updateSong({
+		capo: clamp(parseInt(els.capo.value, 10) || 0, 0, 16)
+	});
+	saveState();
+});
+
 els.timeSignature.addEventListener("input", (event) => {
 	const raw = event.target.value;
-	const auto = raw.replace(/[^0-9]/g, "");
+	const match = raw.match(/^(\d{1,2})\s*\/\s*(\d{1,2})$/);
 	if (auto.length === 1) {
 		event.target.value = auto;
 	} else if (auto.length >= 2) {
@@ -941,6 +973,7 @@ els.timeSignature.addEventListener("input", (event) => {
 els.timeSignature.addEventListener("blur", () => {
 	const song = selectedSong();
 	if (song) els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
+	saveState();
 });
 
 els.timeSignature.addEventListener("focus", () => els.timeSignature.select());
@@ -972,6 +1005,7 @@ els.tempoValue.addEventListener("blur", () => {
 	updateSong({
 		tempo: clamp(parseInt(els.tempoValue.textContent, 10) || 1, 1, 400)
 	});
+	saveState();
 });
 
 document.querySelector(".live-grid").addEventListener("mousedown", (event) => {
@@ -990,11 +1024,12 @@ els.beatFrequency.addEventListener("input", (event) => {
 		beatFrequency: clamp(frequency, 1, 4000)
 	});
 });
-els.beatFrequency.addEventListener("blur", () =>
+els.beatFrequency.addEventListener("blur", () => {
 	updateSong({
 		beatFrequency: clamp(parseInt(els.beatFrequency.value, 10) || 1000, 1, 4000)
-	})
-);
+	});
+	saveState();
+});
 
 els.accentFrequency.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
@@ -1004,11 +1039,12 @@ els.accentFrequency.addEventListener("input", (event) => {
 		accentFrequency: clamp(frequency, 1, 4000)
 	});
 });
-els.accentFrequency.addEventListener("blur", () =>
+els.accentFrequency.addEventListener("blur", () => {
 	updateSong({
 		accentFrequency: clamp(parseInt(els.accentFrequency.value, 10) || 800, 1, 4000)
-	})
-);
+	});
+	saveState();
+});
 
 els.subdivision.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
@@ -1016,11 +1052,12 @@ els.subdivision.addEventListener("input", (event) => {
 		subdivision: clamp(parseInt(event.target.value, 10) || 1, 1, 16)
 	});
 });
-els.subdivision.addEventListener("blur", () =>
+els.subdivision.addEventListener("blur", () => {
 	updateSong({
 		subdivision: clamp(parseInt(els.subdivision.value, 10) || 1, 1, 16)
 	})
-);
+	saveState();
+});
 
 els.subdivisionFrequency.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
@@ -1030,11 +1067,12 @@ els.subdivisionFrequency.addEventListener("input", (event) => {
 		subdivisionFrequency: clamp(frequency, 1, 4000)
 	});
 });
-els.subdivisionFrequency.addEventListener("blur", () =>
+els.subdivisionFrequency.addEventListener("blur", () => {
 	updateSong({
 		subdivisionFrequency: clamp(parseInt(els.subdivisionFrequency.value, 10) || 1200, 1, 4000)
-	})
-);
+	});
+	saveState();
+});
 
 els.doubleTime.addEventListener("click", () => {
 	const song = selectedSong();
@@ -1042,6 +1080,7 @@ els.doubleTime.addEventListener("click", () => {
 	updateSong({
 		doubleTime: !song.doubleTime
 	});
+	saveState();
 });
 
 els.swingToggle.addEventListener("click", cycleSwing);
@@ -1168,7 +1207,7 @@ document.querySelectorAll("input[type='number']").forEach((input) => {
    ============================================================ */
 
 document.addEventListener("keydown", (event) => {
-	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA") return;
+	if (document.activeElement.tagName === "INPUT" || document.activeElement.tagName === "TEXTAREA" || isEditingTempo) return;
 	if (event.key === " ") {
 		event.preventDefault();
 		isPlaying ? stopClock() : startClock();
