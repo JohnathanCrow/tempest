@@ -423,31 +423,14 @@ function renderSongs(activeSong) {
 		row.dataset.itemId = entry.id;
 		row.classList.toggle("active", song.id === activeSong.id);
 
-		row.addEventListener("dragstart", (event) => {
-			draggedItemId = entry.id;
-			row.classList.add("dragging");
-			event.dataTransfer.effectAllowed = "move";
-		});
-		row.addEventListener("dragend", () => {
-			draggedItemId = null;
-			row.classList.remove("dragging");
-		});
-		row.addEventListener("dragover", (event) => {
-			event.preventDefault();
-			event.dataTransfer.dropEffect = "move";
-		});
-		row.addEventListener("drop", (event) => {
-			event.preventDefault();
-			moveItem(draggedItemId, entry.id);
-		});
-
 		const select = document.createElement("button");
 		select.type = "button";
 		select.className = "select-song";
+		select.dataset.action = "select";
+		select.dataset.songId = song.id;
 		select.innerHTML = `<span class="song-title"></span><span class="song-meta"></span>`;
 		select.querySelector(".song-title").textContent = song.name;
 		renderSongMeta(select.querySelector(".song-meta"), song);
-		select.addEventListener("click", () => chooseSong(song.id));
 
 		const bpm = document.createElement("span");
 		bpm.className = "song-bpm";
@@ -456,9 +439,10 @@ function renderSongs(activeSong) {
 		const deleteButton = document.createElement("button");
 		deleteButton.type = "button";
 		deleteButton.className = "delete-song";
+		deleteButton.dataset.action = "delete-song";
+		deleteButton.dataset.songId = song.id;
 		deleteButton.textContent = "×";
 		deleteButton.ariaLabel = `Delete ${song.name}`;
-		deleteButton.addEventListener("click", () => deleteSong(song.id));
 
 		row.append(select, bpm, deleteButton);
 		els.songsList.append(row);
@@ -471,33 +455,16 @@ function renderDivider(entry) {
 	row.draggable = true;
 	row.dataset.itemId = entry.id;
 
-	row.addEventListener("dragstart", (event) => {
-		draggedItemId = entry.id;
-		row.classList.add("dragging");
-		event.dataTransfer.effectAllowed = "move";
-	});
-	row.addEventListener("dragend", () => {
-		draggedItemId = null;
-		row.classList.remove("dragging");
-	});
-	row.addEventListener("dragover", (event) => {
-		event.preventDefault();
-		event.dataTransfer.dropEffect = "move";
-	});
-	row.addEventListener("drop", (event) => {
-		event.preventDefault();
-		moveItem(draggedItemId, entry.id);
-	});
-
 	const rule = document.createElement("div");
 	rule.className = "divider-rule";
 
 	const deleteButton = document.createElement("button");
 	deleteButton.type = "button";
 	deleteButton.className = "delete-song";
+	deleteButton.dataset.action = "delete-divider";
+	deleteButton.dataset.itemId = entry.id;
 	deleteButton.textContent = "×";
 	deleteButton.ariaLabel = "Delete divider";
-	deleteButton.addEventListener("click", () => deleteDivider(entry.id));
 
 	row.append(rule, deleteButton);
 	els.songsList.append(row);
@@ -1158,8 +1125,39 @@ els.practiceSpeed.addEventListener("input", () => {
 els.addSong.addEventListener("click", addSong);
 document.querySelector("#addSongControl").addEventListener("click", addSong);
 els.addDivider.addEventListener("click", addDivider);
-els.exportSongs.addEventListener("click", exportSongs);
+els.songsList.addEventListener("dragstart", (event) => {
+    const row = event.target.closest("[data-item-id]");
+    if (!row) return;
+    draggedItemId = row.dataset.itemId;
+    row.classList.add("dragging");
+    event.dataTransfer.effectAllowed = "move";
+});
+els.songsList.addEventListener("dragend", (event) => {
+    const row = event.target.closest("[data-item-id]");
+    if (!row) return;
+    draggedItemId = null;
+    row.classList.remove("dragging");
+});
+els.songsList.addEventListener("dragover", (event) => {
+    event.preventDefault();
+    event.dataTransfer.dropEffect = "move";
+});
+els.songsList.addEventListener("drop", (event) => {
+    event.preventDefault();
+    const row = event.target.closest("[data-item-id]");
+    if (!row) return;
+    moveItem(draggedItemId, row.dataset.itemId);
+});
+els.songsList.addEventListener("click", (event) => {
+    const selectBtn = event.target.closest("[data-action='select']");
+    if (selectBtn) { chooseSong(selectBtn.dataset.songId); return; }
+    const deleteSongBtn = event.target.closest("[data-action='delete-song']");
+    if (deleteSongBtn) { deleteSong(deleteSongBtn.dataset.songId); return; }
+    const deleteDivBtn = event.target.closest("[data-action='delete-divider']");
+    if (deleteDivBtn) { deleteDivider(deleteDivBtn.dataset.itemId); return; }
+});
 
+els.exportSongs.addEventListener("click", exportSongs);
 els.replaceSongs.addEventListener("click", () => {
 	importMode = "replace";
 	els.importFile.click();
