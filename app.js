@@ -99,6 +99,9 @@ const els = {
 	importFile: document.querySelector("#importFile"),
 	practiceSpeed: document.querySelector("#practiceSpeed"),
 	practiceSpeedLabel: document.querySelector("#practiceSpeedLabel"),
+	setlistSelect: document.querySelector("#setlistSelect"),
+	freeModeToggle: document.querySelector("#freeModeToggle"),
+	flashToggle: document.querySelector("#flashToggle"),
 };
 
 
@@ -247,8 +250,7 @@ function sortedSongIds(mode) {
    ============================================================ */
 
 function render() {
-	const setlistSelect = document.querySelector("#setlistSelect");
-		if (setlistSelect) {
+		if (els.setlistSelect) {
 			setlistSelect.innerHTML = "";
 			state.setlists.forEach(sl => {
 				const option = document.createElement("option");
@@ -282,16 +284,14 @@ function render() {
 	els.playToggle.textContent = isPlaying ? "\u258E\u258E" : "\u25B6";
 	els.playToggle.classList.toggle("is-playing", isPlaying);
 
-	const freeModeToggle = document.querySelector("#freeModeToggle");
-	if (freeModeToggle) {
-		freeModeToggle.classList.toggle("active", freeMode);
-		freeModeToggle.ariaPressed = String(freeMode);
+	if (els.freeModeToggle) {
+		els.freeModeToggle.classList.toggle("active", freeMode);
+		els.freeModeToggle.ariaPressed = String(freeMode);
 	}
 
-	const flashToggle = document.querySelector("#flashToggle");
-	if (flashToggle) {
-		flashToggle.classList.toggle("active", flashEnabled);
-		flashToggle.ariaPressed = String(flashEnabled);
+	if (els.flashToggle) {
+		els.flashToggle.classList.toggle("active", flashEnabled);
+		els.flashToggle.ariaPressed = String(flashEnabled);
 	}
 
 	els.previousSong.disabled = freeMode;
@@ -549,10 +549,9 @@ function toggleFreeMode() {
 
 function toggleFlash() {
 	flashEnabled = !flashEnabled;
-	const flashToggle = document.querySelector("#flashToggle");
-	if (flashToggle) {
-		flashToggle.classList.toggle("active", flashEnabled);
-		flashToggle.ariaPressed = String(flashEnabled);
+	if (els.flashToggle) {
+		els.flashToggle.classList.toggle("active", flashEnabled);
+		els.flashToggle.ariaPressed = String(flashEnabled);
 	}
 	saveState();
 }
@@ -1091,8 +1090,8 @@ els.doubleTime.addEventListener("click", () => {
 
 els.swingToggle.addEventListener("click", cycleSwing);
 
-document.querySelector("#freeModeToggle").addEventListener("click", toggleFreeMode);
-document.querySelector("#flashToggle").addEventListener("click", toggleFlash);
+els.freeModeToggle.addEventListener("click", toggleFreeMode);
+els.flashToggle.addEventListener("click", toggleFlash);
 
 els.notes.addEventListener("input", (event) => updateSong({
 	notes: event.target.value

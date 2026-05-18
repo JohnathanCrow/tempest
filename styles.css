@@ -7,7 +7,6 @@
 
 	--bg: #0A090B;
 	--panel: #131215;
-	--panel-soft: #1d1c21;
 	--line: #1d1c21;
 	--muted: #7a7785;
 	--text: #d9d7e1;
@@ -149,7 +148,7 @@ textarea:disabled {
 .panel-tab {
 	padding: 6px 18px;
 	border: none;
-	background: var(--panel-soft);
+	background: var(--line);
 	color: var(--muted);
 	font-size: .76rem;
 	font-weight: 700;
@@ -222,7 +221,7 @@ textarea:disabled {
 
 #freeModeToggle.active {
 	border-color: transparent;
-	background: var(--panel-soft);
+	background: var(--line);
 	color: var(--blue);
 }
 
@@ -308,7 +307,7 @@ textarea:disabled {
 	justify-items: start;
 	gap: 0px;
 	width: 330px;
-	height: 160px;
+	height: 165px;
 }
 
 label span,
@@ -377,7 +376,7 @@ label span,
 	color: var(--text);
 	font-size: 1rem;
 	outline: none;
-	border: 0px solid var(--line);
+	border: 0px;
 	border-radius: 6px;
 	background: var(--bg);
 	padding: 4px;
@@ -421,7 +420,7 @@ label span,
 	background: var(--blue);
 	border-color: var(--blue);
 	color: var(--bg);
-	box-shadow: 0 0 26px var(--blue-glow);
+	box-shadow: 0 0 18px var(--blue-glow);
 }
 
 
@@ -539,7 +538,7 @@ label span,
 .play-button,
 .transport button{
 	min-height: 38px;
-	border: 0px solid var(--line);
+	border: 0px;
 	border-radius: 6px;
 	background: transparent;
 	color: var(--text);
@@ -553,7 +552,7 @@ label span,
 
 .toggle-button.active {
 	border-color: transparent;
-	background: var(--panel-soft);
+	background: var(--line);
 	color: var(--blue);
 }
 
@@ -611,8 +610,6 @@ label span,
 	padding: 0 10px;
 }
 
-
-
 .set-actions #replaceSongs {
 	color: var(--yellow);
 }
@@ -639,7 +636,7 @@ label span,
 .sort-actions button.active-sort {
     border-color: transparent;
     color: var(--purple);
-    background: var(--panel-soft);
+    background: var(--line);
 }
 
 .songs {
@@ -668,18 +665,16 @@ label span,
 	grid-template-columns: minmax(0, 1fr) auto auto;
 	gap: 10px;
 	align-items: center;
-	border: 1px solid transparent;
-	background: transparent;
-	color: var(--text);
+	color: var(--muted);
 	text-align: left;
-	padding: 8px;
+	padding: 6px;
 	border-radius: 6px;
 }
 
 .song-item.active {
 	border-color: transparent;
-	background: var(--panel-soft);
-	color: var(--blue);
+	background: var(--line);
+	color: var(--text);
 }
 
 .song-item.dragging,
@@ -776,7 +771,7 @@ label span,
     flex: 1;
     min-width: 0;
     height: 38px;
-    border: 0px solid var(--line);
+    border: 0px;
     border-radius: 6px;
     background: var(--bg);
     color: var(--text);
@@ -823,24 +818,20 @@ label span,
 
 	.set-actions-top button:hover {
 		background: var(--blue);
-		filter: brightness(1.15);
+		filter: brightness(1.0);
 	}
 
 	.transport button:hover {
 		color: var(--text);
 		filter: brightness(1.8);
-		text-shadow: 0 0 12px var(--blue-glow);
+		text-shadow: 0 0 18px var(--blue-glow);
 	}
 
-	.practice-speed button:hover {
-		color: var(--text);
-		filter: brightness(1.4);
-	}
 
 	.delete-song:hover {
 		color: var(--danger);
-		filter: brightness(1.6);
-		text-shadow: 0 0 20px var(--blue-glow);
+		filter: brightness(1.8);
+		text-shadow: 0 0 16px var(--blue-glow);
 	}
 
 	.set-actions #clearSongs:hover {
@@ -848,7 +839,7 @@ label span,
 	}
 
 	.beat:hover {
-		background: var(--panel-soft);
+		background: var(--line);
 	}
 }
 
@@ -933,7 +924,6 @@ label span,
 	.tempo-readout {
 		height: 120px;
 		overflow: hidden;
-		padding-top: 0px;
 	}
 
 	.tempo-column {
@@ -974,7 +964,6 @@ label span,
 	.tempo-value {
 		text-align: center;
 	}
-
 
 	.settings-grid {
 		grid-template-columns: repeat(3, minmax(0, 1fr));
