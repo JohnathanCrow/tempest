@@ -568,13 +568,12 @@ function cycleSwing() {
 	saveState();
 }
 
+// After
 function chooseSong(id) {
 	if (!id) return;
 	freeMode = false;
 	selectedId = id;
 	tempSpeed = 0;
-	currentBeat = -1;
-	if (isPlaying) restartClock();
 	render();
 	saveState();
 }
@@ -944,11 +943,7 @@ els.songName.addEventListener("blur", (event) => {
 	saveState();
 });
 
-els.capo.addEventListener("input", (event) =>
-	updateSong({
-		capo: clamp(parseInt(event.target.value, 10) || 0, 0, 16)
-	})
-);
+els.capo.addEventListener("input", () => {});
 
 els.capo.addEventListener("blur", () => {
 	updateSong({
@@ -960,18 +955,20 @@ els.capo.addEventListener("blur", () => {
 els.timeSignature.addEventListener("input", (event) => {
 	const raw = event.target.value;
 	const auto = raw.replace(/\D/g, "");
-	const match = raw.match(/^(\d{1,2})\s*\/\s*(\d{1,2})$/);
 	if (auto.length === 1) {
 		event.target.value = auto;
 	} else if (auto.length >= 2) {
 		event.target.value = `${auto[0]}/${auto[1]}`;
+	}
+});
+els.timeSignature.addEventListener("blur", () => {
+	const auto = els.timeSignature.value.replace(/\D/g, "");
+	if (auto.length >= 2) {
 		updateSong({
 			beatsPerBar: clamp(parseInt(auto[0], 10) || 1, 1, 24),
 			beatValue: clamp(parseInt(auto[1], 10) || 1, 1, 64),
 		});
 	}
-});
-els.timeSignature.addEventListener("blur", () => {
 	const song = selectedSong();
 	if (song) els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
 	saveState();
@@ -1019,11 +1016,6 @@ document.querySelector(".live-grid").addEventListener("mousedown", (event) => {
 
 els.beatFrequency.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
-	const frequency = parseInt(event.target.value, 10);
-	if (!Number.isFinite(frequency)) return;
-	updateSong({
-		beatFrequency: clamp(frequency, 1, 4000)
-	});
 });
 els.beatFrequency.addEventListener("blur", () => {
 	updateSong({
@@ -1034,11 +1026,6 @@ els.beatFrequency.addEventListener("blur", () => {
 
 els.accentFrequency.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
-	const frequency = parseInt(event.target.value, 10);
-	if (!Number.isFinite(frequency)) return;
-	updateSong({
-		accentFrequency: clamp(frequency, 1, 4000)
-	});
 });
 els.accentFrequency.addEventListener("blur", () => {
 	updateSong({
@@ -1049,9 +1036,6 @@ els.accentFrequency.addEventListener("blur", () => {
 
 els.subdivision.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
-	updateSong({
-		subdivision: clamp(parseInt(event.target.value, 10) || 1, 1, 16)
-	});
 });
 els.subdivision.addEventListener("blur", () => {
 	updateSong({
@@ -1062,11 +1046,6 @@ els.subdivision.addEventListener("blur", () => {
 
 els.subdivisionFrequency.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
-	const frequency = parseInt(event.target.value, 10);
-	if (!Number.isFinite(frequency)) return;
-	updateSong({
-		subdivisionFrequency: clamp(frequency, 1, 4000)
-	});
 });
 els.subdivisionFrequency.addEventListener("blur", () => {
 	updateSong({
