@@ -959,6 +959,7 @@ els.capo.addEventListener("blur", () => {
 
 els.timeSignature.addEventListener("input", (event) => {
 	const raw = event.target.value;
+	const auto = raw.replace(/\D/g, "");
 	const match = raw.match(/^(\d{1,2})\s*\/\s*(\d{1,2})$/);
 	if (auto.length === 1) {
 		event.target.value = auto;
@@ -1199,6 +1200,12 @@ document.querySelector("#setlistSelect").addEventListener("change", (event) => s
 
 document.querySelectorAll("input[type='number']").forEach((input) => {
 	input.addEventListener("focus", () => input.select());
+});
+
+document.querySelectorAll("input").forEach((input) => {
+	input.addEventListener("keydown", (event) => {
+		if (event.key === "Enter") input.blur();
+	});
 });
 
 

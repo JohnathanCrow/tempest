@@ -539,7 +539,7 @@ label span,
 .play-button,
 .transport button{
 	min-height: 38px;
-	border: 1px solid var(--line);
+	border: 0px solid var(--line);
 	border-radius: 6px;
 	background: transparent;
 	color: var(--text);
@@ -611,9 +611,7 @@ label span,
 	padding: 0 10px;
 }
 
-.set-actions #addDivider {
-	color: var(--purple);
-}
+
 
 .set-actions #replaceSongs {
 	color: var(--yellow);
@@ -754,13 +752,13 @@ label span,
 	grid-template-columns: minmax(0, 1fr) auto;
 	gap: 8px;
 	align-items: center;
-	color: var(--muted);
+	color: var(--line);
 	padding: 9px 10px;
 }
 
 .divider-rule {
 	height: 1px;
-	background: var(--muted);
+	background: var(--line);
 }
 
 /* ============================================================
