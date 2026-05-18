@@ -512,7 +512,9 @@ function updateSong(patch) {
 
 function toggleFreeMode() {
 	freeMode = !freeMode;
-	if (!freeMode && !selectedSong()) selectedId = state.songs[0]?.id || null;
+	if (!freeMode && !selectedSong()) {
+		selectedId = activeSetlist().songs[0]?.id || null;
+	}
 	tempSpeed = 0;
 	currentBeat = -1;
 	if (isPlaying) restartClock();
@@ -660,7 +662,7 @@ function deleteSetlist() {
     const index = state.setlists.findIndex(s => s.id === state.activeSetlistId);
     state.setlists = state.setlists.filter(s => s.id !== state.activeSetlistId);
     state.activeSetlistId = state.setlists[Math.max(0, index - 1)].id;
-    selectedId = activeSetlist().selectedId || null;
+    selectedId = activeSetlist().songs[0]?.id || null;
     sortMode = "custom";
     sortedViewIds = [];
     tempSpeed = 0;
@@ -1059,15 +1061,25 @@ els.notes.addEventListener("input", (event) => updateSong({
 els.playToggle.addEventListener("click", () => isPlaying ? stopClock() : startClock());
 
 els.previousSong.addEventListener("click", () => {
-	if (!state.songs.length) return;
 	const songIds = visibleSongIds();
-	chooseSong(songIds[(songIds.indexOf(selectedId) - 1 + songIds.length) % songIds.length]);
+	if (!songIds.length) return;
+
+	chooseSong(
+		songIds[
+			(songIds.indexOf(selectedId) - 1 + songIds.length) % songIds.length
+		]
+	);
 });
 
 els.nextSong.addEventListener("click", () => {
-	if (!state.songs.length) return;
 	const songIds = visibleSongIds();
-	chooseSong(songIds[(songIds.indexOf(selectedId) + 1) % songIds.length]);
+	if (!songIds.length) return;
+
+	chooseSong(
+		songIds[
+			(songIds.indexOf(selectedId) + 1) % songIds.length
+		]
+	);
 });
 
 els.tapTempo.addEventListener("click", () => {
