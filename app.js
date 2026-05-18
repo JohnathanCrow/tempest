@@ -730,10 +730,36 @@ function exportSongs() {
 async function replaceSongs(file) {
     try {
         const imported = normalizeSetlist(JSON.parse(await file.text()));
+        const baseName = file.name.split(/[_\-.]/)[0];
+        const capitalized = baseName.charAt(0).toUpperCase() + baseName.slice(1).toLowerCase();
+
+        function uniqueName(name) {
+            const existing = new Set(state.setlists.map(s => s.name));
+            if (!existing.has(name)) return name;
+            let i = 2;
+            while (existing.has(`${name} ${i}`)) i++;
+            return `${name} ${i}`;
+        }
+
         const sl = activeSetlist();
-        sl.songs = imported.songs;
-        sl.items = imported.items;
-		selectedId = imported.songs[0]?.id || null;
+        const isEmpty = sl.songs.length === 0;
+
+        if (isEmpty) {
+            sl.songs = imported.songs;
+            sl.items = imported.items;
+            sl.name = uniqueName(capitalized);
+            selectedId = imported.songs[0]?.id || null;
+        } else {
+            const newSetlist = {
+                id: crypto.randomUUID(),
+                name: uniqueName(capitalized),
+                ...imported
+            };
+            state.setlists.push(newSetlist);
+            state.activeSetlistId = newSetlist.id;
+            selectedId = imported.songs[0]?.id || null;
+        }
+
         sortMode = "custom";
         sortedViewIds = [];
         tempSpeed = 0;
@@ -742,7 +768,7 @@ async function replaceSongs(file) {
     } catch {
         alert("Failed to import file.");
     }
-	saveState();
+    saveState();
 }
 
 async function mergeSongs(file) {

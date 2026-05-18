@@ -1,4 +1,4 @@
-const CACHE_NAME = "tempest-001";
+const CACHE_NAME = "tempest-__TIMESTAMP__";
 const APP_SHELL = [
   "./",
   "./index.html",
