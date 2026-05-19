@@ -1064,6 +1064,15 @@ els.notes.addEventListener("input", (event) => updateSong({
 	notes: event.target.value
 }));
 
+document.querySelectorAll(".nudge-btn").forEach((button) => {
+    button.addEventListener("click", () => {
+        const song = selectedSong();
+        if (!song) return;
+        updateSong({ tempo: clamp(song.tempo + Number(button.dataset.nudge), 1, 400) });
+        saveState();
+    });
+});
+
 
 /* ============================================================
    EVENT LISTENERS — TRANSPORT & NAVIGATION

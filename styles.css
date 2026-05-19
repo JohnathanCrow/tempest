@@ -306,8 +306,8 @@ textarea:disabled {
 	display: grid;
 	justify-items: start;
 	gap: 0px;
-	width: 330px;
-	height: 165px;
+	width: 250px;
+	height: 130px;
 }
 
 label span,
@@ -324,11 +324,12 @@ label span,
 
 .tempo-value {
 	color: var(--blue);
-	font-size: 13rem;
+	font-size: 12rem;
 	line-height: .72;
 	font-weight: 760;
 	font-variant-numeric: tabular-nums;
 	text-shadow: 0 0 12px var(--blue-glow);
+	margin-top: -10px;
 	padding-bottom: 30px;
 	width: 100%;
 	background: transparent;
@@ -336,6 +337,7 @@ label span,
 	outline: none;
 	display: block;
 	overflow: hidden;
+	align-items: start;
 }
 
 .tempo-value::-webkit-outer-spin-button,
@@ -343,6 +345,45 @@ label span,
 	-webkit-appearance: none;
 }
 
+.tempo-nudge-layout {
+    display: flex;
+    flex-direction: row;
+    align-items: start;
+    gap: 8px;
+}
+
+.nudge-column {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.nudge-btn {
+    width: 36px;
+    height: 28px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: transparent;
+    color: var(--muted);
+    font-size: .68rem;
+    font-weight: 700;
+    letter-spacing: .04em;
+    padding: 0;
+    cursor: pointer;
+}
+
+.nudge-btn:hover {
+    background: var(--line);
+    color: var(--text);
+}
+
+.nudge-btn[data-nudge^="-"] {
+    color: var(--danger);
+}
+
+.nudge-btn:not([data-nudge^="-"]) {
+    color: var(--green);
+}
 
 /* ============================================================
    STAGE — SETTINGS GRID
@@ -473,15 +514,7 @@ label span,
 	margin-top: 26px;
 }
 
-.practice-speed input[type="range"] {
-	flex: 1;
-	accent-color: var(--blue);
-	height: 4px;
-	background: var(--line);
-	-webkit-appearance: none;
-	appearance: none;
-	border-radius: 999px;
-}
+
 
 .practice-speed-label {
 	color: var(--muted);
@@ -495,6 +528,38 @@ label span,
 	margin-right: 12px;
 }
 
+.speed-track {
+    flex: 1;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
+
+.speed-track::after {
+    content: "";
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 4px;
+    height: 15px;
+    background: var(--line);
+    pointer-events: none;
+    border-radius: 999px;
+    z-index: 0;
+}
+
+.speed-track input[type="range"] {
+    flex: 1;
+    position: relative;
+    z-index: 1;
+    accent-color: var(--blue);
+    height: 4px;
+    background: var(--line);
+    -webkit-appearance: none;
+    appearance: none;
+    border-radius: 999px;
+}
 
 /* ============================================================
    STAGE — NOTES PANEL
@@ -922,7 +987,7 @@ label span,
 	}
 
 	.tempo-readout {
-		height: 120px;
+		height: 140px;
 		overflow: hidden;
 	}
 
@@ -930,12 +995,7 @@ label span,
 		height: 105px;
 	}
 
-	.tempo-value {
-		font-size: 7rem;
-		height: 120px;
-		text-shadow: 0 0 6px var(--blue-glow);
-		line-height: 0.9;
-	}
+
 
 
 	.live-grid {
@@ -970,6 +1030,7 @@ label span,
 		max-width: 220px;
 		justify-self: center;
 		min-width: 0;
+		margin-top: 64px;
 	}
 
 

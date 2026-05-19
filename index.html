@@ -34,12 +34,18 @@
 						</header>
 						<!-- Live Metronome Controls -->
 						<section class="live-grid" aria-label="Live metronome controls">
-							<section class="tempo-column">
-								<section class="tempo-readout">
-									<div id="effectiveLabel" class="effective-label">Stored tempo</div>
-									<div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
-								</section>
-							</section>
+<section class="tempo-column">
+    <div id="effectiveLabel" class="effective-label">Stored tempo</div>
+    <div class="tempo-nudge-layout">
+        <div class="nudge-column">
+            <button class="nudge-btn" data-nudge="10" type="button">+10</button>
+            <button class="nudge-btn" data-nudge="1" type="button">+1</button>
+            <button class="nudge-btn" data-nudge="-1" type="button">-1</button>
+            <button class="nudge-btn" data-nudge="-10" type="button">-10</button>
+        </div>
+        <div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
+    </div>
+</section>
 							<!-- Settings Configuration -->
 							<section class="settings-grid">
 								<label>
@@ -83,7 +89,9 @@
 						<!-- Practice Speed Controls -->
 						<section class="practice-speed" aria-label="Temporary tempo adjustment">
 							<div class="practice-speed-label">MOD</div>
+							<div class="speed-track">
 							<input id="practiceSpeed" type="range" min="-50" max="50" step="5" value="0" aria-label="Practice speed">
+							</div>
 							<div id="practiceSpeedLabel" class="practice-speed-label">0%</div>
 						</section>
 						<!-- Playback Transport -->
