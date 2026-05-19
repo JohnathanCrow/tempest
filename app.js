@@ -560,6 +560,9 @@ function toggleSettings() {
 	const stage = document.querySelector(".stage");
 	const stageMain = document.querySelector(".stage-main");
 
+	// Select all tab layout elements
+	const allTabs = document.querySelectorAll(".panel-tab");
+
 	if (settingsOpen) {
 		els.gBeatFrequency.value = globalSettings.beatFrequency;
 		els.gBeatVolume.value = globalSettings.beatVolume;
@@ -567,6 +570,14 @@ function toggleSettings() {
 		els.gAccentVolume.value = globalSettings.accentVolume;
 		els.gSubFrequency.value = globalSettings.subdivisionFrequency;
 		els.gSubVolume.value = globalSettings.subdivisionVolume;
+
+		// Visually disable tab layouts
+		allTabs.forEach(tab => {
+			tab.disabled = true;
+			tab.style.opacity = "0.4";
+			tab.style.cursor = "not-allowed";
+		});
+
 		if (isNarrow) {
 			applyTab("settings");
 		} else {
@@ -575,13 +586,29 @@ function toggleSettings() {
 		}
 		els.globalSettingsPanel.hidden = false;
 	} else {
+		stageMain.hidden = false;
+		stageMain.style.display = "";
+		document.querySelector(".set-list").style.display = "";
+		if (notesPanel) {
+			notesPanel.hidden = false;
+			notesPanel.style.display = "";
+		}
+		
+		// Hide the global settings panel when toggled off
 		els.globalSettingsPanel.hidden = true;
-		if (isNarrow) {
-			const activeTab = document.querySelector(".panel-tab.active");
-			applyTab(activeTab ? activeTab.dataset.tab : "control");
+
+		// Restore tab layout visual states
+		allTabs.forEach(tab => {
+			tab.disabled = false;
+			tab.style.opacity = "";
+			tab.style.cursor = "";
+		});
+
+		const activeTabButton = document.querySelector(".panel-tab.active");
+		if (activeTabButton && activeTabButton.dataset.tab) {
+			applyTab(activeTabButton.dataset.tab);
 		} else {
-			stageMain.hidden = false;
-			if (notesPanel) notesPanel.hidden = false;
+			applyTab("control");
 		}
 	}
 }
@@ -946,6 +973,9 @@ const notesPanel = document.querySelector("[data-panel='notes']");
 function initTabs() {
 	document.querySelectorAll(".panel-tab").forEach((tab) => {
 		tab.addEventListener("click", () => {
+			// If Global Settings is toggled on, make tabs unselectable
+			if (settingsOpen) return;
+
 			document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
 			tab.classList.add("active");
 			applyTab(tab.dataset.tab);
