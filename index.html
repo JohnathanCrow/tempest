@@ -15,9 +15,9 @@
 		<main class="app-shell">
 			<!-- Navigation Tabs -->
 <nav class="panel-tabs" aria-label="Panel tabs">
-<button id="addSongControl" class="add-song-control" type="button" aria-label="Add song">✚</button>
-    <button id="freeModeToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⊡</button>
-    <button id="flashToggle" class="plain-button toggle-button" type="button" aria-pressed="false">✦</button>
+	<button id="addSongControl" class="add-song-control" type="button" aria-label="New song">✚</button>
+    <button id="freeModeToggle" class="plain-button toggle-button" type="button" title="Toggle Free Mode" aria-label="Toggle free mode" aria-pressed="false">⊡</button>
+    <button id="flashToggle" class="plain-button toggle-button" type="button" title="Toggle Beat Flash" aria-label="Toggle Beat Flash" aria-pressed="false">✦</button>
     <button class="panel-tab active" data-tab="control" type="button">Control</button>
     <button class="panel-tab" data-tab="notes" type="button">Notes</button>
     <button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
@@ -115,9 +115,9 @@
 					<select id="setlistSelect" class="setlist-select" aria-label="Active setlist">
 						<option>Setlist 1</option>
 					</select>
-					<button id="addSetlist" class="plain-button" type="button" aria-label="Add setlist">+</button>
-					<button id="renameSetlist" class="plain-button" type="button" aria-label="Rename setlist">✎</button>
-					<button id="deleteSetlist" class="plain-button" type="button" aria-label="Delete setlist">×</button>
+					<button id="addSetlist" class="plain-button" type="button" title="New Setlist" aria-label="New setlist">+</button>
+					<button id="renameSetlist" class="plain-button" type="button" title="Rename Setlist" aria-label="Rename setlist">✎</button>
+					<button id="deleteSetlist" class="plain-button" type="button" title="Delete Setlist" aria-label="Delete setlist">×</button>
 				</div>
 				<div class="set-actions">
 					<button id="exportSongs" type="button">Export</button>
@@ -134,8 +134,8 @@
 				</div>
 				</span>
 				<div class="song-actions-bottom">
-					<button id="addSong" type="button" aria-label="Add song">New</button>
-					<button id="addDivider" type="button" aria-label="Add divider">Div</button>
+					<button id="addSong" type="button" aria-label="New song">New Song</button>
+					<button id="addDivider" type="button" aria-label="Add divider">Divider</button>
 				</div>
 				<div id="songsList" class="songs"></div>
 			</aside>
