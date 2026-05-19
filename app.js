@@ -688,7 +688,7 @@ function exportSongs() {
     );
     const link = document.createElement("a");
     link.href = URL.createObjectURL(blob);
-    link.download = `tempest_${sl.name.toLowerCase().replace(/\s+/g, "_")}.json`;
+    link.download = `${sl.name.toLowerCase().replace(/\s+/g, "_")}_setlist.json`;
     link.click();
     URL.revokeObjectURL(link.href);
 }
