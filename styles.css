@@ -308,7 +308,7 @@ div.song-name {
 	display: grid;
 	gap: 10px;
 	min-width: 0;
-	width: 320px;
+	width: auto;
 	height: 165px;
 }
 
@@ -334,20 +334,34 @@ label span,
 .nudge-column {
 	display: flex;
 	flex-direction: column;
-	gap: 4px;
 }
 
 .nudge-btn {
 	width: 36px;
-	height: 31px;
-	border: 1px solid var(--line);
-	border-radius: 4px;
+	height: 34px;
+	border-top: 0;
+	border-bottom: 0;
+	border-left: 1px solid var(--line);
+	border-right: 1px solid var(--line);
+	border-radius: 0;
 	background: transparent;
 	font-size: var(--small);
 	font-weight: 700;
 	letter-spacing: .04em;
 	padding: 0;
 	cursor: pointer;
+}
+
+.nudge-btn[data-nudge="10"] {
+    border-radius: 4px 4px 0 0;
+	border-top: 1px solid var(--line);
+
+}
+
+/* Targets the -10 button specifically */
+.nudge-btn[data-nudge="-10"] {
+    border-radius: 0 0 4px 4px;
+	border-bottom: 1px solid var(--line);
 }
 
 .nudge-btn:hover                  { background: var(--line); color: var(--text); }
@@ -925,6 +939,7 @@ label span,
 
 	.live-grid {
 		grid-template-columns: 1fr;
+		gap: 0;
 	}
 
 	.live-grid > *:nth-child(odd),
@@ -934,7 +949,18 @@ label span,
 
 	.tempo-column {
 		justify-self: center;
+		align-items: start;
+		align-content: start;
+		align: start;
 		width: auto;
+		height: 185px;
+	}
+
+	.nudge-column {
+		align-items: start;
+		align-content: start;
+		align: start;
+		padding-bottom: 20px;
 	}
 
 	.effective-label {
@@ -942,8 +968,10 @@ label span,
 	}
 
 	.tempo-value {
+		margin-top: 0;
 		text-align: center;
-		font-size: 11.5rem;
+		font-size: 9rem;		
+		line-height: 1;
 	}
 
 	.settings-grid {
@@ -960,4 +988,11 @@ label span,
 	.nudge-btn {
 		height: 26px;
 	}
+	
+	.tempo-nudge-layout {
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+}
+	
 }
