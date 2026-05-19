@@ -14,38 +14,37 @@
 	<body>
 		<main class="app-shell">
 			<!-- Navigation Tabs -->
-			<nav class="panel-tabs" aria-label="Panel tabs">
-				<button class="panel-tab active" data-tab="control" type="button">Control</button>
-				<button class="panel-tab" data-tab="notes" type="button">Notes</button>
-				<button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
-			</nav>
+<nav class="panel-tabs" aria-label="Panel tabs">
+<button id="addSongControl" class="add-song-control" type="button" aria-label="Add song">✚</button>
+    <button id="freeModeToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⊡</button>
+    <button id="flashToggle" class="plain-button toggle-button" type="button" aria-pressed="false">✦</button>
+    <button class="panel-tab active" data-tab="control" type="button">Control</button>
+    <button class="panel-tab" data-tab="notes" type="button">Notes</button>
+    <button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
+    
+</nav>
 			<!-- Metronome Stage -->
 			<section class="stage" aria-label="Metronome">
 				<section class="sticky-console">
 					<div class="stage-main">
 						<!-- Song Header -->
-						<div class="freemode-bar">
-							<button id="freeModeToggle" class="plain-button toggle-button" type="button" aria-pressed="false">⊡</button>
-							<button id="flashToggle" class="plain-button toggle-button" type="button" aria-pressed="false">✦</button>
-							<button id="addSongControl" class="add-song-control" type="button" aria-label="Add song">✚</button>
-						</div>
 						<header class="song-header">
 							<textarea id="songName" class="song-name" rows="2" aria-label="Song name" placeholder="Song Title"></textarea>
 						</header>
 						<!-- Live Metronome Controls -->
 						<section class="live-grid" aria-label="Live metronome controls">
-<section class="tempo-column">
-    <div id="effectiveLabel" class="effective-label">Stored tempo</div>
-    <div class="tempo-nudge-layout">
-        <div class="nudge-column">
-            <button class="nudge-btn" data-nudge="10" type="button">+10</button>
-            <button class="nudge-btn" data-nudge="1" type="button">+1</button>
-            <button class="nudge-btn" data-nudge="-1" type="button">-1</button>
-            <button class="nudge-btn" data-nudge="-10" type="button">-10</button>
-        </div>
-        <div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
-    </div>
-</section>
+							<section class="tempo-column">
+								<div id="effectiveLabel" class="effective-label">Stored tempo</div>
+								<div class="tempo-nudge-layout">
+									<div class="nudge-column">
+										<button class="nudge-btn" data-nudge="10" type="button">+10</button>
+										<button class="nudge-btn" data-nudge="1" type="button">+1</button>
+										<button class="nudge-btn" data-nudge="-1" type="button">-1</button>
+										<button class="nudge-btn" data-nudge="-10" type="button">-10</button>
+									</div>
+									<div id="tempoValue" class="tempo-value" contenteditable="true" inputmode="numeric" aria-label="Tempo"></div>
+								</div>
+							</section>
 							<!-- Settings Configuration -->
 							<section class="settings-grid">
 								<label>
@@ -90,7 +89,7 @@
 						<section class="practice-speed" aria-label="Temporary tempo adjustment">
 							<div class="practice-speed-label">MOD</div>
 							<div class="speed-track">
-							<input id="practiceSpeed" type="range" min="-50" max="50" step="5" value="0" aria-label="Practice speed">
+								<input id="practiceSpeed" type="range" min="-50" max="50" step="5" value="0" aria-label="Practice speed">
 							</div>
 							<div id="practiceSpeedLabel" class="practice-speed-label">0%</div>
 						</section>
@@ -111,7 +110,7 @@
 				<div class="stage-spacer" aria-hidden="true"></div>
 			</section>
 			<!-- Sidebar Set List Management -->
-			<aside class="set-list" aria-label="Set list">	
+			<aside class="set-list" aria-label="Set list">
 				<div class="setlist-bar">
 					<select id="setlistSelect" class="setlist-select" aria-label="Active setlist">
 						<option>Setlist 1</option>
@@ -132,7 +131,8 @@
 					<button data-sort="name" type="button">A-Z</button>
 					<button data-sort="tempo" type="button">BPM</button>
 					<button data-sort="capo" type="button">Capo</button>
-				</div></span>
+				</div>
+				</span>
 				<div class="song-actions-bottom">
 					<button id="addSong" type="button" aria-label="Add song">New</button>
 					<button id="addDivider" type="button" aria-label="Add divider">Div</button>
