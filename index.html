@@ -60,10 +60,13 @@
 								<span>Capo</span>
 								<input id="capo" type="number" min="0" max="16" aria-label="Capo position">
 								</label>
-								<label>
-								<span>Time</span>
-								<input id="timeSignature" type="text" maxlength="3" aria-label="Time signature" placeholder="4/4">
-								</label>
+<label>
+<span>Time</span>
+<div class="time-sig-input">
+  <input id="timeSigBeats" type="number" min="1" max="99" placeholder="4" aria-label="Beats per bar">
+  <input id="timeSigValue" type="number" min="1" max="99" placeholder="4" aria-label="Beat value">
+</div>
+</label>
 								<label>
 								<span>Sub</span>
 								<input id="subdivision" type="number" min="1" max="16" aria-label="Subdivision">

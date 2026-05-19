@@ -95,7 +95,8 @@ const els = {
 	artist: document.querySelector("#artist"),
 	length: document.querySelector("#length"),
 	capo: document.querySelector("#capo"),
-	timeSignature: document.querySelector("#timeSignature"),
+	timeSigBeats: document.querySelector("#timeSigBeats"),
+	timeSigValue: document.querySelector("#timeSigValue"),
 	beatsPerBar: document.querySelector("#beatsPerBar"),
 	beatValue: document.querySelector("#beatValue"),
 	doubleTime: document.querySelector("#doubleTime"),
@@ -372,7 +373,7 @@ function renderEmptyState() {
 function setEditorDisabled(disabled) {
 	[
 	els.songName, els.capo, els.artist, els.length,
-	els.timeSignature, els.subdivision,
+	els.timeSigBeats, els.timeSigValue, els.subdivision,
 	els.doubleTime, els.notes,
 	els.tapTempo, els.playToggle,
 	els.previousSong, els.nextSong,
@@ -395,9 +396,10 @@ function renderBeats(song) {
 	els.beatDisplay.innerHTML = "";
 	beatElements = [];
 
-	if (els.timeSignature && !isEditingTempo) {
-		els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
-	}
+if (els.timeSigBeats && !isEditingTempo) {
+	els.timeSigBeats.value = song.beatsPerBar;
+	els.timeSigValue.value = song.beatValue;
+}
 
 	for (let index = 0; index < song.beatsPerBar; index += 1) {
 		const button = document.createElement("button");
@@ -1093,29 +1095,26 @@ els.capo.addEventListener("blur", () => {
 	saveState();
 });
 
-els.timeSignature.addEventListener("input", (event) => {
-	const raw = event.target.value;
-	const auto = raw.replace(/\D/g, "");
-	if (auto.length === 1) {
-		event.target.value = auto;
-	} else if (auto.length >= 2) {
-		event.target.value = `${auto[0]}/${auto[1]}`;
-	}
-});
-els.timeSignature.addEventListener("blur", () => {
-	const auto = els.timeSignature.value.replace(/\D/g, "");
-	if (auto.length >= 2) {
-		updateSong({
-			beatsPerBar: clamp(parseInt(auto[0], 10) || 1, 1, 24),
-			beatValue: clamp(parseInt(auto[1], 10) || 1, 1, 64),
-		});
-	}
+els.timeSigBeats.addEventListener("blur", () => {
+	updateSong({
+		beatsPerBar: clamp(parseInt(els.timeSigBeats.value, 10) || 4, 1, 99)
+	});
 	const song = selectedSong();
-	if (song) els.timeSignature.value = `${song.beatsPerBar}/${song.beatValue}`;
+	if (song) els.timeSigBeats.value = song.beatsPerBar;
 	saveState();
 });
 
-els.timeSignature.addEventListener("focus", () => els.timeSignature.select());
+els.timeSigValue.addEventListener("blur", () => {
+	updateSong({
+		beatValue: clamp(parseInt(els.timeSigValue.value, 10) || 4, 1, 99)
+	});
+	const song = selectedSong();
+	if (song) els.timeSigValue.value = song.beatValue;
+	saveState();
+});
+
+els.timeSigBeats.addEventListener("focus", () => els.timeSigBeats.select());
+els.timeSigValue.addEventListener("focus", () => els.timeSigValue.select());
 
 els.tempoValue.addEventListener("input", (event) => {
 	if (isPlaying) return;
