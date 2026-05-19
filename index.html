@@ -18,6 +18,7 @@
 	<button id="addSongControl" class="add-song-control" type="button" aria-label="New song">✚</button>
     <button id="freeModeToggle" class="plain-button toggle-button" type="button" title="Toggle Free Mode" aria-label="Toggle free mode" aria-pressed="false">⊡</button>
     <button id="flashToggle" class="plain-button toggle-button" type="button" title="Toggle Beat Flash" aria-label="Toggle Beat Flash" aria-pressed="false">✦</button>
+	<button id="settingsToggle" class="plain-button toggle-button" type="button" title="Toggle Global Settings" aria-label="Toggle global settings" aria-pressed="false">⚙</button>
     <button class="panel-tab active" data-tab="control" type="button">Control</button>
     <button class="panel-tab" data-tab="notes" type="button">Notes</button>
     <button class="panel-tab" data-tab="setlist" type="button">Setlist</button>
@@ -47,6 +48,14 @@
 							</section>
 							<!-- Settings Configuration -->
 							<section class="settings-grid">
+							<label style="grid-column: span 2">
+	<span>Artist</span>
+	<input id="artist" type="text" aria-label="Artist name">
+</label>
+<label>
+	<span>Length</span>
+	<input id="length" type="text" maxlength="5" placeholder="0:00" aria-label="Song length">
+</label>
 								<label>
 								<span>Capo</span>
 								<input id="capo" type="number" min="0" max="16" aria-label="Capo position">
@@ -58,18 +67,6 @@
 								<label>
 								<span>Sub</span>
 								<input id="subdivision" type="number" min="1" max="16" aria-label="Subdivision">
-								</label>
-								<label>
-								<span>Freq</span>
-								<input id="beatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
-								</label>
-								<label>
-								<span>A. Freq</span>
-								<input id="accentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
-								</label>
-								<label>
-								<span>S. Freq</span>
-								<input id="subdivisionFrequency" type="number" min="1" max="4000" aria-label="Subdivision frequency">
 								</label>
 								<div class="settings-actions">
 									<span aria-hidden="true">&nbsp;</span>
@@ -106,7 +103,40 @@
 						<label for="notes">Notes</label>
 						<textarea id="notes" rows="24" placeholder="..."></textarea>
 					</section>
+					<section id="globalSettingsPanel" class="global-settings-panel" aria-label="Global settings" hidden>
+<header class="song-header">
+	<div class="song-name">Global Settings</div>
+</header>
+<div class="settings-panel-grid">
+	<label>
+		<span>Beat Freq.</span>
+		<input id="gBeatFrequency" type="number" min="1" max="4000" aria-label="Beat frequency">
+	</label>
+	<label>
+		<span>Accent Freq.</span>
+		<input id="gAccentFrequency" type="number" min="1" max="4000" aria-label="Accent frequency">
+	</label>
+	<label>
+		<span>Sub Freq.</span>
+		<input id="gSubFrequency" type="number" min="1" max="4000" aria-label="Subdivision frequency">
+	</label>
+	<label>
+		<span>Beat Vol.</span>
+		<input id="gBeatVolume" type="number" min="0" max="100" aria-label="Beat volume">
+	</label>
+	<label>
+		<span>Accent Vol.</span>
+		<input id="gAccentVolume" type="number" min="0" max="100" aria-label="Accent volume">
+	</label>
+	<label>
+		<span>Sub Vol.</span>
+		<input id="gSubVolume" type="number" min="0" max="100" aria-label="Subdivision volume">
+	</label>
+</div>
+</section>
+				
 				</section>
+				
 				<div class="stage-spacer" aria-hidden="true"></div>
 			</section>
 			<!-- Sidebar Set List Management -->

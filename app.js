@@ -7,14 +7,32 @@ const FREE_SONG_KEY = "tempest-freesong-v1";
 const FREE_MODE_KEY = "tempest-freemode-v1";
 const FLASH_KEY = "tempest-flash-v1";
 
+const GLOBAL_SETTINGS_KEY = "tempest-globalsettings-v1";
+
+const DEFAULT_GLOBAL_SETTINGS = {
+	beatFrequency: 1000,
+	beatVolume: 80,
+	accentFrequency: 800,
+	accentVolume: 100,
+	subdivisionFrequency: 1200,
+	subdivisionVolume: 60,
+};
+
+function loadGlobalSettings() {
+	try {
+		const saved = JSON.parse(localStorage.getItem(GLOBAL_SETTINGS_KEY));
+		if (saved) return { ...DEFAULT_GLOBAL_SETTINGS, ...saved };
+	} catch {}
+	return { ...DEFAULT_GLOBAL_SETTINGS };
+}
+
 function createSong(overrides = {}) {
 	return {
 		id: crypto.randomUUID(),
 		name: "Untitled Song",
 		tempo: 100,
-		beatFrequency: 1000,
-		accentFrequency: 800,
-		subdivisionFrequency: 1200,
+		artist: "",
+		length: "",
 		capo: 0,
 		beatsPerBar: 4,
 		beatValue: 4,
@@ -40,6 +58,9 @@ let importMode = "replace";
 let freeSong = loadFreeSong();
 let freeMode = localStorage.getItem(FREE_MODE_KEY) === "true";
 let flashEnabled = localStorage.getItem(FLASH_KEY) === "true";
+let settingsOpen = false;
+let globalSettings = loadGlobalSettings();
+
 
 
 /* ============================================================
@@ -71,16 +92,15 @@ let beatElements = [];
 
 const els = {
 	songName: document.querySelector("#songName"),
+	artist: document.querySelector("#artist"),
+	length: document.querySelector("#length"),
 	capo: document.querySelector("#capo"),
 	timeSignature: document.querySelector("#timeSignature"),
-	beatFrequency: document.querySelector("#beatFrequency"),
-	accentFrequency: document.querySelector("#accentFrequency"),
 	beatsPerBar: document.querySelector("#beatsPerBar"),
 	beatValue: document.querySelector("#beatValue"),
 	doubleTime: document.querySelector("#doubleTime"),
 	swingToggle: document.querySelector("#swingToggle"),
 	subdivision: document.querySelector("#subdivision"),
-	subdivisionFrequency: document.querySelector("#subdivisionFrequency"),
 	beatDisplay: document.querySelector("#beatDisplay"),
 	tempoValue: document.querySelector("#tempoValue"),
 	effectiveLabel: document.querySelector("#effectiveLabel"),
@@ -102,6 +122,14 @@ const els = {
 	setlistSelect: document.querySelector("#setlistSelect"),
 	freeModeToggle: document.querySelector("#freeModeToggle"),
 	flashToggle: document.querySelector("#flashToggle"),
+	settingsToggle: document.querySelector("#settingsToggle"),
+	globalSettingsPanel: document.querySelector("#globalSettingsPanel"),
+	gBeatFrequency: document.querySelector("#gBeatFrequency"),
+	gBeatVolume: document.querySelector("#gBeatVolume"),
+	gAccentFrequency: document.querySelector("#gAccentFrequency"),
+	gAccentVolume: document.querySelector("#gAccentVolume"),
+	gSubFrequency: document.querySelector("#gSubFrequency"),
+	gSubVolume: document.querySelector("#gSubVolume"),
 };
 
 
@@ -132,6 +160,7 @@ function saveState() {
     localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
     localStorage.setItem(FREE_MODE_KEY, String(freeMode));
     localStorage.setItem(FLASH_KEY, String(flashEnabled));
+	localStorage.setItem(GLOBAL_SETTINGS_KEY, JSON.stringify(globalSettings));
 }
 
 function loadFreeSong() {
@@ -152,9 +181,8 @@ function normalizeSetlist(raw) {
 		id: song.id || defaults.id,
 		name: song.name || defaults.name,
 		tempo: clamp(parseInt(song.tempo, 10) || defaults.tempo, 1, 400),
-		beatFrequency: clamp(parseInt(song.beatFrequency, 10) || defaults.beatFrequency, 1, 4000),
-		accentFrequency: clamp(parseInt(song.accentFrequency, 10) || defaults.accentFrequency, 1, 4000),
-		subdivisionFrequency: clamp(parseInt(song.subdivisionFrequency, 10) || defaults.subdivisionFrequency, 1, 4000),
+		artist: song.artist || defaults.artist,
+		length: song.length || defaults.length,
 		capo: clamp(parseInt(song.capo, 10) || defaults.capo, 0, 12),
 		beatsPerBar: clamp(parseInt(song.beatsPerBar, 10) || defaults.beatsPerBar, 1, 24),
 		beatValue: clamp(parseInt(song.beatValue, 10) || defaults.beatValue, 1, 64),
@@ -272,12 +300,11 @@ function render() {
 	setEditorDisabled(false);
 
 	els.songName.value = song.name;
+	els.artist.value = song.artist;
+	els.length.value = song.length;
 	els.capo.value = song.capo;
-	els.beatFrequency.value = song.beatFrequency;
-	els.accentFrequency.value = song.accentFrequency;
 
 	els.subdivision.value = song.subdivision;
-	els.subdivisionFrequency.value = song.subdivisionFrequency;
 	els.notes.value = song.notes;
 	if (!isEditingTempo) els.tempoValue.textContent = effectiveTempo(song);
 	els.effectiveLabel.textContent = tempoLabel(song);
@@ -316,6 +343,8 @@ function renderEmptyState() {
 	setEditorDisabled(true);
 
 	els.songName.value = "";
+	els.artist.value = "";
+	els.length.value = "";
 	els.capo.value = "";
 	els.beatFrequency.value = "";
 	els.accentFrequency.value = "";
@@ -342,12 +371,11 @@ function renderEmptyState() {
 
 function setEditorDisabled(disabled) {
 	[
-		els.songName, els.capo,
-		els.beatFrequency, els.accentFrequency,
-		els.timeSignature, els.subdivision, els.subdivisionFrequency,
-		els.doubleTime, els.notes,
-		els.tapTempo, els.playToggle,
-		els.previousSong, els.nextSong,
+	els.songName, els.capo, els.artist, els.length,
+	els.timeSignature, els.subdivision,
+	els.doubleTime, els.notes,
+	els.tapTempo, els.playToggle,
+	els.previousSong, els.nextSong,
 	].forEach((control) => {
 		control.disabled = disabled;
 	});
@@ -521,6 +549,41 @@ function toggleFlash() {
 		els.flashToggle.ariaPressed = String(flashEnabled);
 	}
 	saveState();
+}
+
+function toggleSettings() {
+	settingsOpen = !settingsOpen;
+	els.settingsToggle.classList.toggle("active", settingsOpen);
+	els.settingsToggle.ariaPressed = String(settingsOpen);
+
+	const isNarrow = window.innerWidth <= 1050;
+	const stage = document.querySelector(".stage");
+	const stageMain = document.querySelector(".stage-main");
+
+	if (settingsOpen) {
+		els.gBeatFrequency.value = globalSettings.beatFrequency;
+		els.gBeatVolume.value = globalSettings.beatVolume;
+		els.gAccentFrequency.value = globalSettings.accentFrequency;
+		els.gAccentVolume.value = globalSettings.accentVolume;
+		els.gSubFrequency.value = globalSettings.subdivisionFrequency;
+		els.gSubVolume.value = globalSettings.subdivisionVolume;
+		if (isNarrow) {
+			applyTab("settings");
+		} else {
+			stageMain.hidden = true;
+			if (notesPanel) notesPanel.hidden = true;
+		}
+		els.globalSettingsPanel.hidden = false;
+	} else {
+		els.globalSettingsPanel.hidden = true;
+		if (isNarrow) {
+			const activeTab = document.querySelector(".panel-tab.active");
+			applyTab(activeTab ? activeTab.dataset.tab : "control");
+		} else {
+			stageMain.hidden = false;
+			if (notesPanel) notesPanel.hidden = false;
+		}
+	}
 }
 
 const SWING_LABELS = ["Swing", "Light", "Medium", "Hard"];
@@ -770,26 +833,28 @@ function ensureAudioContext() {
 	return audioContext;
 }
 
-function playClick(accented, time = ensureAudioContext().currentTime, song = selectedSong()) {
+function playClick(accented, time = ensureAudioContext().currentTime) {
 	const context = ensureAudioContext();
 	const oscillator = context.createOscillator();
 	const gain = context.createGain();
-	oscillator.frequency.value = accented ? song.accentFrequency : song.beatFrequency;
+	oscillator.frequency.value = accented ? globalSettings.accentFrequency : globalSettings.beatFrequency;
 	oscillator.type = "sine";
-	gain.gain.setValueAtTime(accented ? 0.45 : 0.25, time);
+	const volume = accented ? (globalSettings.accentVolume / 100) * 0.35 : (globalSettings.beatVolume / 100) * 0.35;
+	gain.gain.setValueAtTime(volume, time);
 	gain.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
 	oscillator.connect(gain).connect(masterGain);
 	oscillator.start(time);
 	oscillator.stop(time + 0.06);
 }
 
-function scheduleSubClick(time, song) {
+function scheduleSubClick(time) {
 	const context = ensureAudioContext();
 	const oscillator = context.createOscillator();
 	const gain = context.createGain();
-	oscillator.frequency.value = song.subdivisionFrequency;
+	oscillator.frequency.value = globalSettings.subdivisionFrequency;
 	oscillator.type = "sine";
-	gain.gain.setValueAtTime(0.08, time);
+	const volume = (globalSettings.subdivisionVolume / 100) * 0.35;
+	gain.gain.setValueAtTime(volume, time);
 	gain.gain.exponentialRampToValueAtTime(0.001, time + 0.055);
 	oscillator.connect(gain).connect(masterGain);
 	oscillator.start(time);
@@ -830,7 +895,7 @@ function schedulerTick() {
 		if (song.subdivision >= 2) {
 			const subInterval = actualInterval / song.subdivision;
 			for (let i = 1; i < song.subdivision; i++) {
-				scheduleSubClick(nextClickTime + subInterval * i, song);
+				scheduleSubClick(nextClickTime + subInterval * i);
 			}
 		}
 		nextBeatIndex = (nextBeatIndex + 1) % song.beatsPerBar;
@@ -892,8 +957,16 @@ function applyTab(tab) {
 	const stage = document.querySelector(".stage");
 	const setList = document.querySelector(".set-list");
 	const stageMain = document.querySelector(".stage-main");
-	const isMobile = window.innerWidth <= 600;
+	const isMobile = window.innerWidth <= 655;
 	const isNarrow = window.innerWidth <= 1050;
+
+	if (tab === "settings") {
+		stage.style.display = "";
+		setList.style.display = "none";
+		stageMain.style.display = "none";
+		if (notesPanel) notesPanel.style.display = "none";
+		return;
+	}
 
 	if (!isNarrow) {
 		stage.style.display = "";
@@ -911,12 +984,13 @@ function applyTab(tab) {
 	} else {
 		stage.style.display = tab === "control" ? "" : "none";
 		setList.style.display = tab === "setlist" ? "" : "none";
-		if (notesPanel) notesPanel.style.display = "";
+		stageMain.style.display = tab === "control" ? "" : "none";
+		if (notesPanel) notesPanel.style.display = tab === "control" ? "" : "none";
 	}
 }
 
 function updateTabVisibility() {
-	const isMobile = window.innerWidth <= 600;
+	const isMobile = window.innerWidth <= 655;
 	const notesTab = document.querySelector("[data-tab='notes']");
 	if (notesTab) notesTab.style.display = isMobile ? "" : "none";
 }
@@ -926,12 +1000,57 @@ function updateTabVisibility() {
    EVENT LISTENERS — SONG SETTINGS
    ============================================================ */
 
+els.settingsToggle.addEventListener("click", toggleSettings);
+
+els.gBeatFrequency.addEventListener("blur", () => {
+	globalSettings.beatFrequency = clamp(parseInt(els.gBeatFrequency.value, 10) || 1000, 1, 4000);
+	saveState();
+});
+els.gBeatVolume.addEventListener("blur", () => {
+	globalSettings.beatVolume = clamp(parseInt(els.gBeatVolume.value, 10) || 80, 0, 100);
+	saveState();
+});
+els.gAccentFrequency.addEventListener("blur", () => {
+	globalSettings.accentFrequency = clamp(parseInt(els.gAccentFrequency.value, 10) || 800, 1, 4000);
+	saveState();
+});
+els.gAccentVolume.addEventListener("blur", () => {
+	globalSettings.accentVolume = clamp(parseInt(els.gAccentVolume.value, 10) || 100, 0, 100);
+	saveState();
+});
+els.gSubFrequency.addEventListener("blur", () => {
+	globalSettings.subdivisionFrequency = clamp(parseInt(els.gSubFrequency.value, 10) || 1200, 1, 4000);
+	saveState();
+});
+els.gSubVolume.addEventListener("blur", () => {
+	globalSettings.subdivisionVolume = clamp(parseInt(els.gSubVolume.value, 10) || 60, 0, 100);
+	saveState();
+});
+
 els.songName.addEventListener("input", (event) =>
 	updateSong({ name: event.target.value })
 );
 
 els.songName.addEventListener("blur", (event) => {
 	if (!event.target.value.trim()) updateSong({ name: "Untitled Song" });
+	saveState();
+});
+
+els.artist.addEventListener("input", (event) =>
+	updateSong({ artist: event.target.value })
+);
+els.artist.addEventListener("blur", () => saveState());
+
+els.length.addEventListener("input", (event) => {
+	const raw = event.target.value.replace(/\D/g, "");
+	if (raw.length >= 2) {
+		event.target.value = `${raw.slice(0, -2)}:${raw.slice(-2)}`;
+	} else {
+		event.target.value = raw;
+	}
+});
+els.length.addEventListener("blur", () => {
+	updateSong({ length: els.length.value });
 	saveState();
 });
 
@@ -1006,26 +1125,6 @@ document.querySelector(".live-grid").addEventListener("mousedown", (event) => {
 });
 
 
-els.beatFrequency.addEventListener("input", (event) => {
-	if (event.target.value === "") return;
-});
-els.beatFrequency.addEventListener("blur", () => {
-	updateSong({
-		beatFrequency: clamp(parseInt(els.beatFrequency.value, 10) || 1000, 1, 4000)
-	});
-	saveState();
-});
-
-els.accentFrequency.addEventListener("input", (event) => {
-	if (event.target.value === "") return;
-});
-els.accentFrequency.addEventListener("blur", () => {
-	updateSong({
-		accentFrequency: clamp(parseInt(els.accentFrequency.value, 10) || 800, 1, 4000)
-	});
-	saveState();
-});
-
 els.subdivision.addEventListener("input", (event) => {
 	if (event.target.value === "") return;
 });
@@ -1036,15 +1135,6 @@ els.subdivision.addEventListener("blur", () => {
 	saveState();
 });
 
-els.subdivisionFrequency.addEventListener("input", (event) => {
-	if (event.target.value === "") return;
-});
-els.subdivisionFrequency.addEventListener("blur", () => {
-	updateSong({
-		subdivisionFrequency: clamp(parseInt(els.subdivisionFrequency.value, 10) || 1200, 1, 4000)
-	});
-	saveState();
-});
 
 els.doubleTime.addEventListener("click", () => {
 	const song = selectedSong();
@@ -1246,6 +1336,18 @@ document.addEventListener("keydown", (event) => {
    ============================================================ */
 
 window.addEventListener("resize", () => {
+	if (settingsOpen) {
+		const stageMain = document.querySelector(".stage-main");
+		const isNarrow = window.innerWidth <= 1050;
+		if (!isNarrow) {
+			stageMain.hidden = true;
+			els.globalSettingsPanel.hidden = false;
+		} else {
+			stageMain.hidden = false;
+			applyTab("settings");
+		}
+		return;
+	}
 	const isNarrow = window.innerWidth <= 1050;
 	if (!isNarrow) {
 		document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));

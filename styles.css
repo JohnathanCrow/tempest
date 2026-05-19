@@ -182,7 +182,8 @@ textarea:disabled {
 }
 
 #freeModeToggle,
-#flashToggle {
+#flashToggle,
+#settingsToggle {
 	width: 30px;
 	height: 30px;
 	min-height: unset;
@@ -224,6 +225,40 @@ textarea:disabled {
 
 
 /* ============================================================
+   GLOBAL SETTINGS PANEL
+   ============================================================ */
+
+.global-settings-panel {
+	padding: 0px;
+}
+
+.settings-panel-grid {
+	display: grid;
+	grid-template-columns: repeat(3, minmax(0, 1fr));
+	gap: 6px 10px;
+	max-width: 290px;
+}
+
+.settings-panel-grid label {
+	display: grid;
+	grid-template-rows: 14px 32px;
+	gap: 4px;
+}
+
+.settings-panel-grid input {
+	width: 100%;
+	height: 30px;
+	color: var(--text);
+	font-size: var(--medium);
+	outline: none;
+	border: 0;
+	border-radius: 4px;
+	background: var(--bg);
+	padding: 4px;
+}
+
+
+/* ============================================================
    STAGE — SONG HEADER
    ============================================================ */
 
@@ -232,7 +267,8 @@ textarea:disabled {
 	min-height: 72px;
 }
 
-.song-name {
+.song-name,
+div.song-name {
 	width: 100%;
 	min-height: 2.2em;
 	resize: none;
@@ -861,7 +897,8 @@ label span,
 
 	.add-song-control,
 	#freeModeToggle,
-	#flashToggle {
+	#flashToggle,
+	#settingsToggle	{
 		position: relative;
 		bottom: -4px;
 	}
@@ -881,7 +918,7 @@ label span,
    RESPONSIVE — MOBILE
    ============================================================ */
 
-@media (max-width: 600px) {
+@media (max-width: 655px) {
 	.song-name {
 		text-align: center;
 	}
