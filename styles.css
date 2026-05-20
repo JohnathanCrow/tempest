@@ -268,7 +268,8 @@ textarea:disabled {
 }
 
 .song-name,
-div.song-name {
+div.song-name,
+div.global-settings-subheading {
 	width: 100%;
 	min-height: 2.2em;
 	resize: none;

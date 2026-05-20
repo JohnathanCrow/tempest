@@ -16,6 +16,16 @@ const DEFAULT_GLOBAL_SETTINGS = {
 	accentVolume: 100,
 	subdivisionFrequency: 1200,
 	subdivisionVolume: 60,
+	defaultTempo: 100,
+	defaultArtist: "",
+	defaultLength: "",
+	defaultCapo: 0,
+	defaultBeatsPerBar: 4,
+	defaultBeatValue: 4,
+	defaultSubdivision: 1,
+	defaultDoubleTime: false,
+	defaultSwing: 0,
+	defaultAccentFirstBeat: false,
 };
 
 function loadGlobalSettings() {
@@ -30,22 +40,22 @@ function createSong(overrides = {}) {
 	return {
 		id: crypto.randomUUID(),
 		name: "Untitled Song",
-		tempo: 100,
-		artist: "",
-		length: "",
-		capo: 0,
-		beatsPerBar: 4,
-		beatValue: 4,
-		subdivision: 1,
-		doubleTime: false,
-		swing: 0,
+		tempo: globalSettings.defaultTempo ?? 100,
+		artist: globalSettings.defaultArtist ?? "",
+		length: globalSettings.defaultLength ?? "",
+		capo: globalSettings.defaultCapo ?? 0,
+		beatsPerBar: globalSettings.defaultBeatsPerBar ?? 4,
+		beatValue: globalSettings.defaultBeatValue ?? 4,
+		subdivision: globalSettings.defaultSubdivision ?? 1,
+		doubleTime: globalSettings.defaultDoubleTime ?? false,
+		swing: globalSettings.defaultSwing ?? 0,
 		notes: "",
-		accents: [],
+		accents: (globalSettings.defaultAccentFirstBeat ?? false) ? [0] : [],
 		...overrides
 	};
 }
 
-const DEFAULT_FREE_SONG = createSong({ id: "free", name: "Free Mode" });
+const DEFAULT_FREE_SONG = { id: "free", name: "Free Mode", tempo: 100, artist: "", length: "", capo: 0, beatsPerBar: 4, beatValue: 4, subdivision: 1, doubleTime: false, swing: 0, notes: "", accents: [] };
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 
@@ -132,11 +142,20 @@ const els = {
 	gAccentVolume: document.querySelector("#gAccentVolume"),
 	gSubFrequency: document.querySelector("#gSubFrequency"),
 	gSubVolume: document.querySelector("#gSubVolume"),
+	gDefaultTempo: document.querySelector("#gDefaultTempo"),
+	gDefaultArtist: document.querySelector("#gDefaultArtist"),
+	gDefaultCapo: document.querySelector("#gDefaultCapo"),
+	gDefaultBeatsPerBar: document.querySelector("#gDefaultBeatsPerBar"),
+	gDefaultBeatValue: document.querySelector("#gDefaultBeatValue"),
+	gDefaultSubdivision: document.querySelector("#gDefaultSubdivision"),
+	gDefaultDoubleTime: document.querySelector("#gDefaultDoubleTime"),
+	gDefaultSwing: document.querySelector("#gDefaultSwing"),
+	gDefaultAccent: document.querySelector("#gDefaultAccent"),
 	customModal: document.querySelector("#customModal"),
-modalMessage: document.querySelector("#modalMessage"),
-modalInput: document.querySelector("#modalInput"),
-modalConfirm: document.querySelector("#modalConfirm"),
-modalCancel: document.querySelector("#modalCancel"),
+	modalMessage: document.querySelector("#modalMessage"),
+	modalInput: document.querySelector("#modalInput"),
+	modalConfirm: document.querySelector("#modalConfirm"),
+	modalCancel: document.querySelector("#modalCancel"),
 };
 
 
@@ -587,8 +606,20 @@ function toggleSettings() {
 		els.gAccentVolume.value = globalSettings.accentVolume;
 		els.gSubFrequency.value = globalSettings.subdivisionFrequency;
 		els.gSubVolume.value = globalSettings.subdivisionVolume;
+		els.gDefaultTempo.value = globalSettings.defaultTempo;
+		els.gDefaultArtist.value = globalSettings.defaultArtist;
+		els.gDefaultCapo.value = globalSettings.defaultCapo;
+		els.gDefaultBeatsPerBar.value = globalSettings.defaultBeatsPerBar;
+		els.gDefaultBeatValue.value = globalSettings.defaultBeatValue;
+		els.gDefaultSubdivision.value = globalSettings.defaultSubdivision;
+		els.gDefaultDoubleTime.classList.toggle("active", globalSettings.defaultDoubleTime);
+		els.gDefaultDoubleTime.ariaPressed = String(globalSettings.defaultDoubleTime);
+		els.gDefaultSwing.classList.toggle("active", globalSettings.defaultSwing > 0);
+		els.gDefaultSwing.textContent = SWING_LABELS[globalSettings.defaultSwing];
+		els.gDefaultSwing.ariaPressed = String(globalSettings.defaultSwing > 0);
+		els.gDefaultAccent.classList.toggle("active", globalSettings.defaultAccentFirstBeat);
+		els.gDefaultAccent.ariaPressed = String(globalSettings.defaultAccentFirstBeat);
 
-		// Visually disable tab layouts
 		allTabs.forEach(tab => {
 			tab.disabled = true;
 			tab.style.opacity = "0.4";
@@ -737,7 +768,7 @@ function sortSongs(mode) {
 
 async function addSetlist() {
     const number = state.setlists.length + 1;
-    const name = await openModal({ message: "Setlist Name:", green: true, input: true, inputDefault: `Setlist ${number}` });
+    const name = await openModal({ message: "Setlist Name:", input: true, inputDefault: `Setlist ${number}` });
     if (!name) return;
     const setlist = { id: crypto.randomUUID(), name, ...normalizeSetlist({}) };
     state.setlists.push(setlist);
@@ -1072,6 +1103,51 @@ els.gSubFrequency.addEventListener("blur", () => {
 });
 els.gSubVolume.addEventListener("blur", () => {
 	globalSettings.subdivisionVolume = clamp(parseInt(els.gSubVolume.value, 10) || 60, 0, 100);
+	saveState();
+});
+
+els.gDefaultTempo.addEventListener("blur", () => {
+	globalSettings.defaultTempo = clamp(parseInt(els.gDefaultTempo.value, 10) || 100, 1, 400);
+	saveState();
+});
+els.gDefaultArtist.addEventListener("blur", () => {
+	globalSettings.defaultArtist = els.gDefaultArtist.value;
+	saveState();
+});
+
+els.gDefaultCapo.addEventListener("blur", () => {
+	globalSettings.defaultCapo = clamp(parseInt(els.gDefaultCapo.value, 10) || 0, 0, 16);
+	saveState();
+});
+els.gDefaultBeatsPerBar.addEventListener("blur", () => {
+	globalSettings.defaultBeatsPerBar = clamp(parseInt(els.gDefaultBeatsPerBar.value, 10) || 4, 1, 12);
+	saveState();
+});
+els.gDefaultBeatValue.addEventListener("blur", () => {
+	globalSettings.defaultBeatValue = clamp(parseInt(els.gDefaultBeatValue.value, 10) || 4, 1, 16);
+	saveState();
+});
+els.gDefaultSubdivision.addEventListener("blur", () => {
+	globalSettings.defaultSubdivision = clamp(parseInt(els.gDefaultSubdivision.value, 10) || 1, 1, 16);
+	saveState();
+});
+els.gDefaultDoubleTime.addEventListener("click", () => {
+	globalSettings.defaultDoubleTime = !globalSettings.defaultDoubleTime;
+	els.gDefaultDoubleTime.classList.toggle("active", globalSettings.defaultDoubleTime);
+	els.gDefaultDoubleTime.ariaPressed = String(globalSettings.defaultDoubleTime);
+	saveState();
+});
+els.gDefaultSwing.addEventListener("click", () => {
+	globalSettings.defaultSwing = (globalSettings.defaultSwing + 1) % 4;
+	els.gDefaultSwing.classList.toggle("active", globalSettings.defaultSwing > 0);
+	els.gDefaultSwing.textContent = SWING_LABELS[globalSettings.defaultSwing];
+	els.gDefaultSwing.ariaPressed = String(globalSettings.defaultSwing > 0);
+	saveState();
+});
+els.gDefaultAccent.addEventListener("click", () => {
+	globalSettings.defaultAccentFirstBeat = !globalSettings.defaultAccentFirstBeat;
+	els.gDefaultAccent.classList.toggle("active", globalSettings.defaultAccentFirstBeat);
+	els.gDefaultAccent.ariaPressed = String(globalSettings.defaultAccentFirstBeat);
 	saveState();
 });
 
