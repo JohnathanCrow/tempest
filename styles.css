@@ -120,18 +120,27 @@ textarea:disabled {
 
 .stage {
 	position: relative;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
+	overflow: hidden;
 }
 
 .sticky-console {
 	position: relative;
 	z-index: 2;
-	display: grid;
+	display: flex;
+	flex-direction: column;
 	gap: 14px;
 	padding: 18px;
-	align-content: start;
 	border-radius: 4px;
+	flex: 1;
+	min-height: 0;
 }
 
+.stage-main {
+	flex: 0 0 auto;
+}
 
 /* ============================================================
    LAYOUT — PANEL TABS
@@ -609,10 +618,9 @@ label span,
 
 .notes-panel textarea {
 	width: 100%;
-	resize: vertical;
-	height: 363px;
-	min-height: 363px;
-	max-height: 736px;
+	flex: 1;
+	min-height: 50px;
+	resize: none;
 	margin-top: 10px;
 	border: 1px dashed var(--line);
 	border-radius: 4px;
@@ -620,6 +628,13 @@ label span,
 	color: var(--text);
 	padding: 10px;
 	outline: none;
+}
+
+.notes-panel {
+	flex: 1;
+	display: flex;
+	flex-direction: column;
+	min-height: 0;
 }
 
 
@@ -1047,8 +1062,11 @@ label span,
 	}
 
 	.stage {
-		border-top: none;
-	}
+	border-top: none;
+	height: calc(100dvh - 70px);
+	min-height: unset;
+	overflow: hidden;
+}
 
 	.add-song-control,
 	#freeModeToggle,

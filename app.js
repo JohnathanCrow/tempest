@@ -1074,6 +1074,15 @@ function updateTabVisibility() {
 	if (notesTab) notesTab.style.display = isMobile ? "" : "none";
 }
 
+function resizeNotesTextarea() {
+	if (window.innerWidth > 1050) return;
+	const textarea = els.notes;
+	if (!textarea || textarea.offsetParent === null) return;
+	textarea.style.height = "0px";
+	const top = textarea.getBoundingClientRect().top;
+	textarea.style.height = Math.max(120, window.innerHeight - top - 18) + "px";
+}
+
 
 /* ============================================================
    EVENT LISTENERS — SONG SETTINGS
