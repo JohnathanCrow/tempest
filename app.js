@@ -55,7 +55,7 @@ function createSong(overrides = {}) {
 	};
 }
 
-const DEFAULT_FREE_SONG = { id: "free", name: "Free Mode", tempo: 100, artist: "", length: "", capo: 0, beatsPerBar: 4, beatValue: 4, subdivision: 1, doubleTime: false, swing: 0, notes: "", accents: [] };
+const DEFAULT_FREE_SONG = { id: "free", name: "Basic Mode", tempo: 100, artist: "", length: "", capo: 0, beatsPerBar: 4, beatValue: 4, subdivision: 1, doubleTime: false, swing: 0, notes: "", accents: [] };
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 

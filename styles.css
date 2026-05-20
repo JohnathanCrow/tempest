@@ -132,7 +132,7 @@ textarea:disabled {
 	display: flex;
 	flex-direction: column;
 	gap: 14px;
-	padding: 18px;
+	padding: 10px;
 	border-radius: 4px;
 	flex: 1;
 	min-height: 0;
@@ -1031,7 +1031,7 @@ label span,
 }
 
 /* ============================================================
-   RESPONSIVE — NARROW (TABLET / SMALL DESKTOP)
+   RESPONSIVE — NARROW
    ============================================================ */
 
 @media (max-width: 1050px) {
@@ -1158,4 +1158,53 @@ label span,
 	align-items: center;
 	}
 	
+}
+
+
+/* ============================================================
+   RESPONSIVE — 720P
+   ============================================================ */
+@media (max-height: 750px) {
+	.song-header {
+		min-height: 48px;
+	}
+
+	.song-name,
+	div.song-name,
+	div.global-settings-subheading {
+		font-size: 1.5rem;
+		min-height: 1.5em;
+	}
+
+	.sticky-console {
+		gap: 8px;
+	}
+
+	.live-grid {
+		gap: 16px;
+	}
+
+
+
+	.practice-speed {
+		margin-top: 10px;
+	}
+
+	.transport {
+		margin-top: 5px;
+	}
+
+	.beat {
+		margin-top: 5px;
+		width: 28px;
+		height: 28px;
+	}
+
+	.beat-display {
+		min-height: 32px;
+	}
+
+	.settings-grid {
+		gap: 4px 10px;
+	}
 }
