@@ -637,6 +637,10 @@ label span,
 	min-height: 0;
 }
 
+.notes-panel[hidden] {
+	display: none;
+}
+
 
 /* ============================================================
    BUTTONS — SHARED STYLES
