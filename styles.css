@@ -170,9 +170,9 @@ textarea:disabled {
 
 .add-song-control {
 	display: none;
-	width: 29px;
-	height: 29px;
-	border: 1px solid var(--blue);
+	width: 30px;
+	height: 30px;
+	border: 0px solid var(--blue);
 	border-radius: 4px;
 	background: var(--blue);
 	color: var(--bg);
@@ -187,23 +187,22 @@ textarea:disabled {
 	width: 30px;
 	height: 30px;
 	min-height: unset;
-	font-size: var(--small);
+	font-size: var(--medium);
 	padding: 0;
 	display: grid;
 	place-items: center;
 	position: relative;
 	bottom: 0;
-		background: var(--line);
+	background: var(--line);
+	opacity: 60%;
 }
 
-#freeModeToggle.active {
-	border-color: transparent;
+#freeModeToggle.active,
+#flashToggle.active,
+#settingsToggle.active {	
 	background: var(--line);
 	color: var(--blue);
-}
-
-#flashToggle.active {
-	color: var(--blue);
+	opacity: 100%;
 }
 
 
@@ -838,7 +837,7 @@ label span,
 
 .setlist-bar {
 	display: flex;
-	gap: 8px;
+	gap: 10px;
 	align-items: center;
 	margin-bottom: 10px;
 }
@@ -846,7 +845,8 @@ label span,
 .setlist-select {
 	flex: 1;
 	min-width: 0;
-	height: 38px;
+	width: 100%; 
+	height: 34px;     
 	border: 0;
 	border-radius: 4px;
 	background: var(--bg);
@@ -855,11 +855,12 @@ label span,
 	outline: none;
 	cursor: pointer;
 	font-size: var(--medium);
+	text-align: left;
 }
 
 .setlist-bar .plain-button {
-	width: 38px;
-	height: 38px;
+	width: 36px;
+	height: 34px;
 	padding: 0;
 	font-size: var(--medium);
 	display: grid;
@@ -900,6 +901,114 @@ label span,
 	}
 }
 
+/* ============================================================
+   SET LIST — CUSTOM SELECT BACKUP
+   ============================================================ */
+
+.custom-select-wrapper {
+	position: relative;
+	flex: 1;
+	min-width: 0;
+	
+}
+
+.custom-options-list {
+	position: absolute;
+	top: calc(100% - 2px);
+	left: 0;
+	width: 100%;
+	max-height: 200px;
+	overflow-y: auto;
+	background: var(--bg);
+	border-radius: 0 0 4px 4px;
+	padding: 0;
+	margin: 0;
+	list-style: none;
+	z-index: 10;
+	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+	scrollbar-color: var(--line) transparent;
+	scrollbar-width: thin;
+	
+}
+
+.custom-options-list li {
+	padding: 10px 12px;
+	font-size: var(--medium);
+	color: var(--muted);
+	cursor: pointer;
+	white-space: nowrap;
+	overflow: hidden;
+	text-overflow: ellipsis;
+}
+
+.custom-options-list li:hover {
+	background: var(--line);
+	color: var(--muted);
+}
+
+.custom-options-list li[aria-selected="true"] {
+	background: var(--line);
+	color: var(--text);
+}
+
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+.modal-backdrop {
+	position: fixed;
+	inset: 0;
+	background: rgba(0, 0, 0, 0.6);
+	display: grid;
+	place-items: center;
+	z-index: 100;
+}
+
+.modal-backdrop[hidden] {
+	display: none;
+}
+
+.modal-box {
+	background: var(--panel);
+	border: 1px solid var(--line);
+	border-radius: 4px;
+	padding: 18px;
+	width: min(360px, calc(100vw - 32px));
+	display: grid;
+	gap: 14px;
+}
+
+.modal-message {
+	color: var(--text);
+	font-size: var(--medium);
+	margin: 0;
+}
+
+.modal-input {
+	width: 100%;
+	height: 30px;
+	color: var(--text);
+	font-size: var(--medium);
+	outline: none;
+	border: 0;
+	border-radius: 4px;
+	background: var(--bg);
+	padding: 4px 8px;
+}
+
+.modal-input[hidden] {
+	display: none;
+}
+
+.modal-actions {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+}
+
+.modal-actions .danger-action {
+	color: var(--danger);
+}
 
 /* ============================================================
    RESPONSIVE — NARROW (TABLET / SMALL DESKTOP)

@@ -120,7 +120,8 @@ const els = {
 	importFile: document.querySelector("#importFile"),
 	practiceSpeed: document.querySelector("#practiceSpeed"),
 	practiceSpeedLabel: document.querySelector("#practiceSpeedLabel"),
-	setlistSelect: document.querySelector("#setlistSelect"),
+	setlistDropdownTrigger: document.querySelector("#setlistDropdownTrigger"),
+	setlistDropdownOptions: document.querySelector("#setlistDropdownOptions"),
 	freeModeToggle: document.querySelector("#freeModeToggle"),
 	flashToggle: document.querySelector("#flashToggle"),
 	settingsToggle: document.querySelector("#settingsToggle"),
@@ -131,6 +132,11 @@ const els = {
 	gAccentVolume: document.querySelector("#gAccentVolume"),
 	gSubFrequency: document.querySelector("#gSubFrequency"),
 	gSubVolume: document.querySelector("#gSubVolume"),
+	customModal: document.querySelector("#customModal"),
+modalMessage: document.querySelector("#modalMessage"),
+modalInput: document.querySelector("#modalInput"),
+modalConfirm: document.querySelector("#modalConfirm"),
+modalCancel: document.querySelector("#modalCancel"),
 };
 
 
@@ -279,16 +285,18 @@ function sortedSongIds(mode) {
    ============================================================ */
 
 function render() {
-		if (els.setlistSelect) {
-			setlistSelect.innerHTML = "";
-			state.setlists.forEach(sl => {
-				const option = document.createElement("option");
-				option.value = sl.id;
-				option.textContent = sl.name;
-				option.selected = sl.id === state.activeSetlistId;
-				setlistSelect.append(option);
-			});
-		}
+if (els.setlistDropdownTrigger && els.setlistDropdownOptions) {
+    els.setlistDropdownTrigger.textContent = activeSetlist().name;
+    els.setlistDropdownOptions.innerHTML = "";
+    state.setlists.forEach(sl => {
+        const li = document.createElement("li");
+        li.setAttribute("role", "option");
+        li.setAttribute("aria-selected", String(sl.id === state.activeSetlistId));
+        li.dataset.value = sl.id;
+        li.textContent = sl.name;
+        els.setlistDropdownOptions.append(li);
+    });
+}
 	const song = selectedSong();
 	if (!song) {
 		selectedId = null;
@@ -727,21 +735,19 @@ function sortSongs(mode) {
    SETLIST ACTIONS
    ============================================================ */
 
-function addSetlist() {
+async function addSetlist() {
     const number = state.setlists.length + 1;
-    const name = prompt("New setlist name:", `Setlist ${number}`);
+    const name = await openModal({ message: "Setlist Name:", green: true, input: true, inputDefault: `Setlist ${number}` });
     if (!name) return;
-    const setlist = { id: crypto.randomUUID(), name: name.trim() || `Setlist ${number}`, ...normalizeSetlist({}) };
+    const setlist = { id: crypto.randomUUID(), name, ...normalizeSetlist({}) };
     state.setlists.push(setlist);
     switchSetlist(setlist.id);
 }
 
-function deleteSetlist() {
-    if (state.setlists.length === 1) {
-        alert("You must have at least one setlist.");
-        return;
-    }
-    if (!confirm(`Delete "${activeSetlist().name}"?`)) return;
+async function deleteSetlist() {
+    if (state.setlists.length === 1) return;
+    const confirmed = await openModal({ message: `Delete '${activeSetlist().name}'?`, danger: true });
+    if (!confirmed) return;
     const index = state.setlists.findIndex(s => s.id === state.activeSetlistId);
     state.setlists = state.setlists.filter(s => s.id !== state.activeSetlistId);
     state.activeSetlistId = state.setlists[Math.max(0, index - 1)].id;
@@ -751,16 +757,15 @@ function deleteSetlist() {
     tempSpeed = 0;
     stopClock();
     render();
-	saveState();
+    saveState();
 }
-
-function renameSetlist() {
+async function renameSetlist() {
     const sl = activeSetlist();
-    const name = prompt("Rename setlist:", sl.name);
-    if (!name || name.trim() === sl.name) return;
-    sl.name = name.trim();
+    const name = await openModal({ message: "Setlist Rename:", input: true, inputDefault: sl.name });
+    if (!name || name === sl.name) return;
+    sl.name = name;
     render();
-	saveState();
+    saveState();
 }
 
 function switchSetlist(id) {
@@ -1311,8 +1316,9 @@ els.importFile.addEventListener("change", (event) => {
 	event.target.value = "";
 });
 
-els.clearSongs.addEventListener("click", () => {
-    if (!confirm("Clear the entire setlist?")) return;
+els.clearSongs.addEventListener("click", async () => {
+    const confirmed = await openModal({ message: "Clear Setlist?", danger: true });
+    if (!confirmed) return;
     const sl = activeSetlist();
     const fresh = normalizeSetlist({});
     sl.songs = fresh.songs;
@@ -1333,7 +1339,28 @@ document.querySelectorAll("[data-sort]").forEach((button) =>
 document.querySelector("#addSetlist").addEventListener("click", addSetlist);
 document.querySelector("#renameSetlist").addEventListener("click", renameSetlist);
 document.querySelector("#deleteSetlist").addEventListener("click", deleteSetlist);
-document.querySelector("#setlistSelect").addEventListener("change", (event) => switchSetlist(event.target.value));
+els.setlistDropdownTrigger.addEventListener("click", (event) => {
+    event.stopPropagation();
+    const opening = els.setlistDropdownOptions.hidden;
+    els.setlistDropdownOptions.hidden = !opening;
+    els.setlistDropdownTrigger.setAttribute("aria-expanded", String(opening));
+});
+
+els.setlistDropdownOptions.addEventListener("click", (event) => {
+    const li = event.target.closest("li[data-value]");
+    if (!li) return;
+    els.setlistDropdownOptions.hidden = true;
+    els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
+    switchSetlist(li.dataset.value);
+});
+
+document.addEventListener("click", (event) => {
+    if (els.setlistDropdownOptions.hidden) return;
+    if (els.setlistDropdownTrigger.contains(event.target) ||
+        els.setlistDropdownOptions.contains(event.target)) return;
+    els.setlistDropdownOptions.hidden = true;
+    els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
+});
 
 /* ============================================================
    EVENT LISTENERS — INPUT AUTO-SELECT
@@ -1414,6 +1441,41 @@ if ("serviceWorker" in navigator) {
 	});
 }
 
+/* ============================================================
+   MODAL
+   ============================================================ */
+
+let modalResolve = null;
+
+function openModal({ message, input = false, inputDefault = "", danger = false }) {
+	return new Promise((resolve) => {
+		modalResolve = resolve;
+		els.modalMessage.textContent = message;
+		els.modalInput.hidden = !input;
+		els.modalInput.value = inputDefault;
+		els.modalConfirm.classList.toggle("danger-action", danger);
+		els.customModal.hidden = false;
+		if (input) setTimeout(() => els.modalInput.focus(), 0);
+	});
+}
+
+els.modalCancel.addEventListener("click", () => {
+	els.customModal.hidden = true;
+	if (modalResolve) { modalResolve(null); modalResolve = null; }
+});
+
+els.modalConfirm.addEventListener("click", () => {
+	const value = els.modalInput.hidden ? true : els.modalInput.value.trim();
+	els.customModal.hidden = true;
+	if (modalResolve) { modalResolve(value || null); modalResolve = null; }
+});
+
+els.customModal.addEventListener("click", (event) => {
+	if (event.target === els.customModal) {
+		els.customModal.hidden = true;
+		if (modalResolve) { modalResolve(null); modalResolve = null; }
+	}
+});
 
 /* ============================================================
    INIT

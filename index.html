@@ -141,14 +141,17 @@
 			</section>
 			<!-- Sidebar Set List Management -->
 			<aside class="set-list" aria-label="Set list">
-				<div class="setlist-bar">
-					<select id="setlistSelect" class="setlist-select" aria-label="Active setlist">
-						<option>Setlist 1</option>
-					</select>
-					<button id="addSetlist" class="plain-button" type="button" title="New Setlist" aria-label="New setlist">+</button>
-					<button id="renameSetlist" class="plain-button" type="button" title="Rename Setlist" aria-label="Rename setlist">✎</button>
-					<button id="deleteSetlist" class="plain-button" type="button" title="Delete Setlist" aria-label="Delete setlist">×</button>
-				</div>
+<div class="setlist-bar">
+	<div class="custom-select-wrapper">
+		<button id="setlistDropdownTrigger" class="setlist-select" type="button" aria-haspopup="listbox" aria-expanded="false">Setlist 1</button>
+		<ul id="setlistDropdownOptions" class="custom-options-list" role="listbox" hidden>
+			<li role="option" aria-selected="true" data-value="Setlist 1">Setlist 1</li>
+		</ul>
+	</div>
+	<button id="addSetlist" class="plain-button" type="button" title="New Setlist" aria-label="New setlist">+</button>
+	<button id="renameSetlist" class="plain-button" type="button" title="Rename Setlist" aria-label="Rename setlist">✎</button>
+	<button id="deleteSetlist" class="plain-button" type="button" title="Delete Setlist" aria-label="Delete setlist">×</button>
+</div>
 				<div class="set-actions">
 					<button id="exportSongs" type="button">Export</button>
 					<button id="replaceSongs" type="button">Import</button>
@@ -169,6 +172,16 @@
 				</div>
 				<div id="songsList" class="songs"></div>
 			</aside>
+			<div id="customModal" class="modal-backdrop" hidden>
+    <div class="modal-box" role="dialog" aria-modal="true">
+        <p id="modalMessage" class="modal-message"></p>
+        <input id="modalInput" class="modal-input" type="text" hidden>
+        <div class="modal-actions">
+            <button id="modalCancel" class="plain-button" type="button">Cancel</button>
+            <button id="modalConfirm" class="plain-button" type="button">Confirm</button>
+        </div>
+    </div>
+</div>
 		</main>
 		<script src="app.js"></script>
 	</body>
