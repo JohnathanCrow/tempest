@@ -393,13 +393,17 @@ function renderBeats(song) {
 
 	song.accents = [...validAccents].sort((a, b) => a - b);
 
-	els.beatDisplay.innerHTML = "";
-	beatElements = [];
+els.beatDisplay.innerHTML = "";
+beatElements = [];
 
 if (els.timeSigBeats && !isEditingTempo) {
 	els.timeSigBeats.value = song.beatsPerBar;
 	els.timeSigValue.value = song.beatValue;
 }
+
+const numRows = song.beatsPerBar >= 8 ? 2 : 1;
+const beatsPerRow = Math.ceil(song.beatsPerBar / numRows);
+els.beatDisplay.style.gridTemplateColumns = `repeat(${beatsPerRow}, 32px)`;
 
 	for (let index = 0; index < song.beatsPerBar; index += 1) {
 		const button = document.createElement("button");
@@ -431,6 +435,7 @@ function updateCurrentBeatDisplay() {
 	beatElements.forEach((button, index) => {
 		button.classList.toggle("current", index === currentBeat);
 	});
+	
 }
 
 function renderSongs(activeSong) {
@@ -974,14 +979,18 @@ const notesPanel = document.querySelector("[data-panel='notes']");
 
 function initTabs() {
 	document.querySelectorAll(".panel-tab").forEach((tab) => {
-		tab.addEventListener("click", () => {
-			// If Global Settings is toggled on, make tabs unselectable
-			if (settingsOpen) return;
+tab.addEventListener("click", () => {
+	if (settingsOpen) return;
 
-			document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
-			tab.classList.add("active");
-			applyTab(tab.dataset.tab);
-		});
+	document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
+	tab.classList.add("active");
+	applyTab(tab.dataset.tab);
+
+	if (tab.dataset.tab === "control") {
+		const song = selectedSong();
+		if (song) renderBeats(song);
+	}
+});
 	});
 }
 
@@ -1097,7 +1106,7 @@ els.capo.addEventListener("blur", () => {
 
 els.timeSigBeats.addEventListener("blur", () => {
 	updateSong({
-		beatsPerBar: clamp(parseInt(els.timeSigBeats.value, 10) || 4, 1, 99)
+		beatsPerBar: clamp(parseInt(els.timeSigBeats.value, 10) || 4, 1, 12)
 	});
 	const song = selectedSong();
 	if (song) els.timeSigBeats.value = song.beatsPerBar;
@@ -1106,7 +1115,7 @@ els.timeSigBeats.addEventListener("blur", () => {
 
 els.timeSigValue.addEventListener("blur", () => {
 	updateSong({
-		beatValue: clamp(parseInt(els.timeSigValue.value, 10) || 4, 1, 99)
+		beatValue: clamp(parseInt(els.timeSigValue.value, 10) || 4, 1, 16)
 	});
 	const song = selectedSong();
 	if (song) els.timeSigValue.value = song.beatValue;
@@ -1411,4 +1420,5 @@ if ("serviceWorker" in navigator) {
 initTabs();
 updateTabVisibility();
 applyTab("control");
+
 render();

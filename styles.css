@@ -468,11 +468,9 @@ label span,
 
 .beat-display {
 	min-height: 42px;
-	display: flex;
-	align-items: center;
+	display: grid;
 	justify-content: center;
 	gap: 8px;
-	flex-wrap: wrap;
 }
 
 .beat {
@@ -1025,6 +1023,6 @@ label span,
 	display: flex;
 	flex-direction: row;
 	align-items: center;
-}
+	}
 	
 }
