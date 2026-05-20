@@ -301,8 +301,8 @@ function render() {
 	setEditorDisabled(false);
 
 	els.songName.value = song.name;
-	els.artist.value = song.artist;
-	els.length.value = song.length;
+	els.artist.value = song.artist || "";
+	els.length.value = song.length || "";
 	els.capo.value = song.capo;
 
 	els.subdivision.value = song.subdivision;
@@ -506,7 +506,9 @@ function renderDivider(entry) {
 }
 
 function renderSongMeta(container, song) {
-	const parts = [`${song.beatsPerBar}/${song.beatValue}`];
+	const parts = [];
+	if (song.length) parts.push(song.length);
+	parts.push(`${song.beatsPerBar}/${song.beatValue}`);
 	if (song.capo) parts.push(`Capo ${song.capo}`);
 	container.textContent = parts.join(" · ");
 

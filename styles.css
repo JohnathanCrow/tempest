@@ -193,6 +193,7 @@ textarea:disabled {
 	place-items: center;
 	position: relative;
 	bottom: 0;
+		background: var(--line);
 }
 
 #freeModeToggle.active {
@@ -236,7 +237,7 @@ textarea:disabled {
 	display: grid;
 	grid-template-columns: repeat(3, minmax(0, 1fr));
 	gap: 6px 10px;
-	max-width: 290px;
+	max-width: 300px;
 }
 
 .settings-panel-grid label {
