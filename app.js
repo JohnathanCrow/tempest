@@ -374,10 +374,7 @@ function renderEmptyState() {
 	els.artist.value = "";
 	els.length.value = "";
 	els.capo.value = "";
-	els.beatFrequency.value = "";
-	els.accentFrequency.value = "";
 	els.subdivision.value = "";
-	els.subdivisionFrequency.value = "";
 	els.notes.value = "";
 	els.tempoValue.textContent = "";
 	els.effectiveLabel.textContent = "Setlist empty";
