@@ -31,8 +31,7 @@
    RESET & BASE
    ============================================================ */
 
-
-/* Add this rule at the top of your base styles to lock scaling */
+/*lock scaling for android */
 html {
 	font-size: 14px !important;
 	-webkit-text-size-adjust: 100% !important;
@@ -44,8 +43,7 @@ html {
 }
 
 body {
-	margin: 0;
-
+	margin: auto;
 	overflow: auto;
 	background: var(--bg);
 	color: var(--text);
@@ -158,6 +156,10 @@ textarea:disabled {
 	flex: 0 0 auto;
 }
 
+button svg {
+	display: block;
+}
+
 /* ============================================================
    LAYOUT — PANEL TABS
    ============================================================ */
@@ -206,6 +208,8 @@ textarea:disabled {
 	font-size: var(--medium);
 	font-weight: 700;
 	padding: 0;
+	display: grid;
+	place-items: center;
 }
 
 #freeModeToggle,
@@ -408,7 +412,6 @@ label span,
 
 }
 
-/* Targets the -10 button specifically */
 .nudge-btn[data-nudge="-10"] {
 	border-radius: 0 0 4px 4px;
 	border-bottom: 1px solid var(--line);
@@ -618,9 +621,9 @@ label span,
 	left: 10px;
 	width: 30px;
 	height: 30px;
-	border: 1px solid var(--line);
+	border: 0px solid var(--line);
 	border-radius: 4px;
-	background: var(--line);
+	background: transparent;
 	color: var(--muted);
 	font-size: var(--small);
 	font-weight: 700;
@@ -630,6 +633,7 @@ label span,
 	display: grid;
 	place-items: center;
 	opacity: 60%;
+	margin-top: 2px;
 }
 
 .github-button:hover {
@@ -647,8 +651,8 @@ label span,
 	justify-content: left;
 	flex: 1;
 	text-align: left;
-	margin-top: 6px;
-	margin-left: 38px;
+	margin-top: 11px;
+	margin-left: 34px;
 	text-transform: uppercase;
 }
 
@@ -1032,8 +1036,7 @@ label span,
 	.sort-actions button:hover,
 	#freeModeToggle:hover,
 	#flashToggle:hover,
-	#settingsToggle:hover,
-	.github-button:hover {
+	#settingsToggle:hover {
 		background: var(--line);
 	}
 
@@ -1237,7 +1240,13 @@ label span,
    ============================================================ */
 
 @media (max-width: 655px) {
-	.song-name {
+	.app-shell {
+		width: 100vw;
+		margin: 6px 0 0 0;
+	}
+
+	.song-name,
+	div.global-settings-subheading {
 		text-align: center;
 	}
 
@@ -1257,14 +1266,14 @@ label span,
 		align-content: start;
 		align: start;
 		width: auto;
-		height: 185px;
+		height: 175px;
 	}
 
 	.nudge-column {
 		align-items: start;
 		align-content: start;
 		align: start;
-		padding-bottom: 20px;
+		padding-bottom: 12px;
 	}
 
 	.effective-label {
@@ -1273,9 +1282,10 @@ label span,
 
 	.tempo-value {
 		margin-top: 0;
-		text-align: center;
+		text-align: left;
 		font-size: 9rem;
 		line-height: 1;
+		margin-right: 10px;
 	}
 
 	.settings-grid {
@@ -1299,79 +1309,96 @@ label span,
 		align-items: center;
 	}
 
-}
+	.tempo-value {
+		margin-top: 0;
+		text-align: center;
+		font-size: 9rem;
+		line-height: 1;
+		width: 3ch;
+	}
+
+	.practice-speed-label {
+		text-align: right;
+
+	}
+
+	#practiceSpeedLabel {
+		text-align: left;
+	}
 
 
-/* ============================================================
+	/* ============================================================
    RESPONSIVE — 720P
    ============================================================ */
-@media (max-height: 750px) {
-	.song-header {
-		min-height: 10px;
+	@media (max-height: 750px) {
+
+
+		.song-header {
+			min-height: 10px;
+		}
+
+		.song-name,
+		div.song-name,
+		div.global-settings-subheading {
+			font-size: 1.2rem;
+			min-height: 2.9rem;
+		}
+
+		.sticky-console {
+			gap: 4px;
+			padding: 2px;
+		}
+
+		.live-grid {
+			gap: 4px;
+		}
+
+		.practice-speed {
+			margin-top: 16px;
+		}
+
+		.transport {
+			margin-top: 0px;
+		}
+
+		.beat {
+			margin-top: 2px;
+			width: 26px;
+			height: 26px;
+		}
+
+		.beat-display {
+			min-height: 30px;
+		}
+
+		.settings-grid {
+			gap: 1px 8px;
+		}
+
+		.tempo-nudge-layout {
+			height: 90px;
+		}
+
+		.tempo-column {
+			height: 125px;
+			overflow: hidden;
+
+		}
+
+		.tempo-value {
+			margin-bottom: 10px;
+			text-align: center;
+			font-size: 8rem;
+			line-height: 1;
+		}
+
+		.nudge-btn {
+			font-size: 8px !important;
+			height: 24px;
+		}
+
+		.settings-actions {
+			grid-template-rows: 14px 25px;
+		}
+
 	}
-
-	.song-name,
-	div.song-name,
-	div.global-settings-subheading {
-		font-size: 1.2rem;
-		min-height: 2.9rem;
-	}
-
-	.sticky-console {
-		gap: 4px;
-		padding: 2px;
-	}
-
-	.live-grid {
-		gap: 4px;
-	}
-
-	.practice-speed {
-		margin-top: 16px;
-	}
-
-	.transport {
-		margin-top: 0px;
-	}
-
-	.beat {
-		margin-top: 2px;
-		width: 26px;
-		height: 26px;
-	}
-
-	.beat-display {
-		min-height: 30px;
-	}
-
-	.settings-grid {
-		gap: 1px 8px;
-	}
-
-	.tempo-nudge-layout {
-		height: 90px;
-	}
-
-	.tempo-column {
-		height: 125px;
-		overflow: hidden;
-
-	}
-
-	.tempo-value {
-		margin-bottom: 10px;
-		text-align: center;
-		font-size: 8rem;
-		line-height: 1;
-	}
-
-	.nudge-btn {
-		font-size: 8px !important;
-		height: 24px;
-	}
-
-	.settings-actions {
-		grid-template-rows: 14px 25px;
-	}
-
-}

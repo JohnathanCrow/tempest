@@ -21,3 +21,12 @@ yarn-error.log*
 # Operating system artifacts
 .DS_Store
 Thumbs.db
+logo.png
+icons/circle-plus.svg
+icons/circle-x.svg
+icons/infinity.svg
+icons/pen.svg
+icons/settings.svg
+icons/square-plus.svg
+icons/square-x.svg
+icons/zap.svg

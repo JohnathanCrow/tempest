@@ -1690,6 +1690,55 @@ els.customModal.addEventListener("click", (event) => {
 });
 
 /* ============================================================
+   SWIPE — TAB NAVIGATION
+   ============================================================ */
+
+let touchStartX = 0;
+let touchStartY = 0;
+const SWIPE_THRESHOLD = 50;
+
+document.addEventListener("touchstart", (e) => {
+    touchStartX = e.touches[0].clientX;
+    touchStartY = e.touches[0].clientY;
+}, { passive: true });
+
+document.addEventListener("touchend", (e) => {
+    if (window.innerWidth > 1050) return;
+    const target = e.target;
+    if (target.closest("input, textarea, select, [contenteditable]")) return;
+
+    const dx = e.changedTouches[0].clientX - touchStartX;
+    const dy = e.changedTouches[0].clientY - touchStartY;
+
+    if (Math.abs(dx) < SWIPE_THRESHOLD) return;
+    if (Math.abs(dy) > Math.abs(dx) * 0.55) return;
+
+    const isMobile = window.innerWidth <= 655;
+    const tabs = isMobile ? ["control", "notes", "setlist"] : ["control", "setlist"];
+
+    const activeTab = document.querySelector(".panel-tab.active");
+    const currentTab = activeTab ? activeTab.dataset.tab : "control";
+    const currentIndex = tabs.indexOf(currentTab);
+
+    const nextIndex = dx < 0
+        ? Math.min(currentIndex + 1, tabs.length - 1)
+        : Math.max(currentIndex - 1, 0);
+
+    if (nextIndex === currentIndex) return;
+
+    const nextTab = tabs[nextIndex];
+    document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
+    const nextTabBtn = document.querySelector(`.panel-tab[data-tab="${nextTab}"]`);
+    if (nextTabBtn) nextTabBtn.classList.add("active");
+    applyTab(nextTab);
+
+    if (nextTab === "control") {
+        const song = selectedSong();
+        if (song) renderBeats(song);
+    }
+}, { passive: true });
+
+/* ============================================================
    INIT
    ============================================================ */
 
