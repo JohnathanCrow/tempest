@@ -211,7 +211,7 @@ textarea:disabled {
 #settingsToggle.active {	
 	background: var(--line);
 	color: var(--blue);
-	opacity: 100%;
+	opacity: 80%;
 }
 
 
@@ -550,6 +550,49 @@ label span,
 	padding-top: 4px;
 }
 
+/* ============================================================
+   STAGE — FOOTER
+   ============================================================ */
+
+.stage-footer {
+    display: flex;
+    align-items: right;
+    justify-content: right;
+    position: relative;
+    padding: 10px;
+    flex-shrink: 0;
+    margin-top: auto;
+}
+
+.github-button {
+    position: absolute;
+    left: 10px;
+    width: 30px;
+    height: 30px;
+    border: 1px solid var(--line);
+    border-radius: 4px;
+    background: var(--line);
+    color: var(--muted);
+    font-size: var(--small);
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    text-decoration: none;
+    display: grid;
+    place-items: center;
+    opacity: 60%;
+}
+
+.github-button:hover {
+    opacity: 100%;
+    color: var(--text);
+}
+
+.stage-logo {
+    width: 150px;
+    height: 25px;
+    display: block;
+}
 
 /* ============================================================
    STAGE — PRACTICE SPEED
@@ -731,8 +774,11 @@ label span,
 	text-transform: uppercase;
 }
 
+#addDivider {
+	color: var(--muted);
+}
+
 .song-actions-bottom button:hover  { background: var(--line); }
-.song-actions-bottom button:active { opacity: .7; }
 
 .songs {
 	margin-top: 20px;
@@ -764,6 +810,11 @@ label span,
 	text-align: left;
 	padding: 6px;
 	border-radius: 4px;
+}
+
+.song-item:hover {
+	background: var(--line);
+
 }
 
 .song-item.active {
@@ -898,8 +949,17 @@ label span,
 @media (hover: hover) {
 	.plain-button:hover,
 	.set-actions button:hover,
-	.sort-actions button:hover {
+	.sort-actions button:hover,
+	#freeModeToggle:hover,
+	#flashToggle:hover,
+	#settingsToggle:hover,
+	.github-button:hover {
 		background: var(--line);
+	}
+	#freeModeToggle:hover,
+	#flashToggle:hover,
+	#settingsToggle:hover {
+    opacity: 100%;
 	}
 
 	.transport button:hover {
@@ -1166,45 +1226,52 @@ label span,
    ============================================================ */
 @media (max-height: 750px) {
 	.song-header {
-		min-height: 48px;
+		min-height: 50px;
 	}
 
 	.song-name,
 	div.song-name,
 	div.global-settings-subheading {
-		font-size: 1.5rem;
-		min-height: 1.5em;
+		font-size: 1.2rem;
+		min-height: 2.9rem;
 	}
 
 	.sticky-console {
-		gap: 8px;
+		gap: 4px;
 	}
 
 	.live-grid {
-		gap: 16px;
+		gap: 4px;
 	}
 
-
-
 	.practice-speed {
-		margin-top: 10px;
+		margin-top: 18px;
 	}
 
 	.transport {
-		margin-top: 5px;
+		margin-top: 4px;
 	}
 
 	.beat {
-		margin-top: 5px;
-		width: 28px;
-		height: 28px;
+		margin-top: 2px;
+		width: 26px;
+		height: 26px;
 	}
 
 	.beat-display {
-		min-height: 32px;
+		min-height: 30px;
 	}
 
 	.settings-grid {
-		gap: 4px 10px;
+		gap: 4px 8px;
+	}
+	
+	.tempo-nudge-layout {
+		height: 130px;
+	}
+	.tempo-column {
+		height: 160px;
+		overflow: hidden;
+
 	}
 }
