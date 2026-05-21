@@ -1,0 +1,65 @@
+{
+  "name": "tempest",
+  "version": "1.0.0",
+  "description": "Offline set-list metronome for song tempos, time signatures, accents, capo positions, and notes.",
+  "main": "electron/main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "node scripts/build-win.mjs"
+  },
+  "keywords": [
+    "metronome",
+    "setlist",
+    "music",
+    "electron"
+  ],
+  "author": "Johnathan Crow",
+  "license": "MIT",
+  "build": {
+    "appId": "com.johnathancrow.tempest",
+    "productName": "Tempest",
+    "copyright": "Copyright © 2026 Johnathan Crow",
+    "directories": {
+      "output": "dist"
+    },
+    "files": [
+      "electron/**/*",
+      "index.html",
+      "app.js",
+      "styles.css",
+      "manifest.webmanifest",
+      "sw.js",
+      "icons/**/*",
+      "logo_small.png"
+    ],
+    "win": {
+      "signAndEditExecutable": false,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "icons/icon-256.ico",
+      "artifactName": "${productName}-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "installerIcon": "icons/icon-256.ico",
+      "uninstallerIcon": "icons/icon-256.ico",
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Tempest"
+    }
+  },
+  "devDependencies": {
+    "electron": "^42.2.0",
+    "electron-builder": "^26.8.1",
+    "rcedit": "^5.0.2"
+  }
+}
