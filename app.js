@@ -31,9 +31,14 @@ const DEFAULT_GLOBAL_SETTINGS = {
 function loadGlobalSettings() {
 	try {
 		const saved = JSON.parse(localStorage.getItem(GLOBAL_SETTINGS_KEY));
-		if (saved) return { ...DEFAULT_GLOBAL_SETTINGS, ...saved };
+		if (saved) return {
+			...DEFAULT_GLOBAL_SETTINGS,
+			...saved
+		};
 	} catch {}
-	return { ...DEFAULT_GLOBAL_SETTINGS };
+	return {
+		...DEFAULT_GLOBAL_SETTINGS
+	};
 }
 
 function createSong(overrides = {}) {
@@ -55,7 +60,21 @@ function createSong(overrides = {}) {
 	};
 }
 
-const DEFAULT_FREE_SONG = { id: "free", name: "Basic Mode", tempo: 100, artist: "", length: "", capo: 0, beatsPerBar: 4, beatValue: 4, subdivision: 1, doubleTime: false, swing: 0, notes: "", accents: [] };
+const DEFAULT_FREE_SONG = {
+	id: "free",
+	name: "Basic Mode",
+	tempo: 100,
+	artist: "",
+	length: "",
+	capo: 0,
+	beatsPerBar: 4,
+	beatValue: 4,
+	subdivision: 1,
+	doubleTime: false,
+	swing: 0,
+	notes: "",
+	accents: []
+};
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 
@@ -70,8 +89,6 @@ let freeSong = loadFreeSong();
 let freeMode = localStorage.getItem(FREE_MODE_KEY) === "true";
 let flashEnabled = localStorage.getItem(FLASH_KEY) === "true";
 let settingsOpen = false;
-
-
 
 
 /* ============================================================
@@ -165,46 +182,65 @@ const els = {
    ============================================================ */
 
 function loadState() {
-    try {
-        const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
-        if (raw?.setlists) return raw;
+	try {
+		const raw = JSON.parse(localStorage.getItem(STORAGE_KEY));
+		if (raw?.setlists) return raw;
 
-        // Legacy migration
-        const legacy = JSON.parse(localStorage.getItem("set-click-metronome-v2"));
-        if (legacy?.songs) {
-            const setlist = { id: crypto.randomUUID(), name: "Setlist 1", ...normalizeSetlist(legacy) };
-            return { setlists: [setlist], activeSetlistId: setlist.id };
-        }
-    } catch {
-        localStorage.removeItem(STORAGE_KEY);
-    }
-    const setlist = { id: crypto.randomUUID(), name: "Setlist 1", ...normalizeSetlist({}) };
-    return { setlists: [setlist], activeSetlistId: setlist.id };
+		// Legacy migration
+		const legacy = JSON.parse(localStorage.getItem("set-click-metronome-v2"));
+		if (legacy?.songs) {
+			const setlist = {
+				id: crypto.randomUUID(),
+				name: "Setlist 1",
+				...normalizeSetlist(legacy)
+			};
+			return {
+				setlists: [setlist],
+				activeSetlistId: setlist.id
+			};
+		}
+	} catch {
+		localStorage.removeItem(STORAGE_KEY);
+	}
+	const setlist = {
+		id: crypto.randomUUID(),
+		name: "Setlist 1",
+		...normalizeSetlist({})
+	};
+	return {
+		setlists: [setlist],
+		activeSetlistId: setlist.id
+	};
 }
 
 function saveState() {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
-    localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
-    localStorage.setItem(FREE_MODE_KEY, String(freeMode));
-    localStorage.setItem(FLASH_KEY, String(flashEnabled));
+	localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+	localStorage.setItem(FREE_SONG_KEY, JSON.stringify(freeSong));
+	localStorage.setItem(FREE_MODE_KEY, String(freeMode));
+	localStorage.setItem(FLASH_KEY, String(flashEnabled));
 	localStorage.setItem(GLOBAL_SETTINGS_KEY, JSON.stringify(globalSettings));
 }
 
 function loadFreeSong() {
-    try {
-        const saved = JSON.parse(localStorage.getItem(FREE_SONG_KEY));
-        if (saved) return { ...DEFAULT_FREE_SONG, ...saved };
-    } catch {}
-    return { ...DEFAULT_FREE_SONG };
+	try {
+		const saved = JSON.parse(localStorage.getItem(FREE_SONG_KEY));
+		if (saved) return {
+			...DEFAULT_FREE_SONG,
+			...saved
+		};
+	} catch {}
+	return {
+		...DEFAULT_FREE_SONG
+	};
 }
 
 function activeSetlist() {
-    return state.setlists.find(s => s.id === state.activeSetlistId) || state.setlists[0];
+	return state.setlists.find(s => s.id === state.activeSetlistId) || state.setlists[0];
 }
 
 function normalizeSetlist(raw) {
 	const defaults = createSong();
-    const songs = (raw.songs || []).map((song) => ({
+	const songs = (raw.songs || []).map((song) => ({
 		id: song.id || defaults.id,
 		name: song.name || defaults.name,
 		tempo: clamp(parseInt(song.tempo, 10) || defaults.tempo, 1, 400),
@@ -220,25 +256,43 @@ function normalizeSetlist(raw) {
 		accents: Array.isArray(song.accents) ? song.accents.filter((beat) => Number.isInteger(beat)) : defaults.accents,
 	}));
 
-    const songIds = new Set(songs.map((song) => song.id));
-    const rawItems = Array.isArray(raw.items) ?
-        raw.items :
-        songs.map((song) => ({ type: "song", id: song.id, songId: song.id }));
+	const songIds = new Set(songs.map((song) => song.id));
+	const rawItems = Array.isArray(raw.items) ?
+		raw.items :
+		songs.map((song) => ({
+			type: "song",
+			id: song.id,
+			songId: song.id
+		}));
 
-    const seenSongs = new Set();
-    const items = rawItems.map((item) => {
-        if (item.type === "divider") return { type: "divider", id: item.id || crypto.randomUUID() };
-        const songId = item.songId || item.id;
-        if (!songIds.has(songId) || seenSongs.has(songId)) return null;
-        seenSongs.add(songId);
-        return { type: "song", id: item.id || songId, songId };
-    }).filter(Boolean);
+	const seenSongs = new Set();
+	const items = rawItems.map((item) => {
+		if (item.type === "divider") return {
+			type: "divider",
+			id: item.id || crypto.randomUUID()
+		};
+		const songId = item.songId || item.id;
+		if (!songIds.has(songId) || seenSongs.has(songId)) return null;
+		seenSongs.add(songId);
+		return {
+			type: "song",
+			id: item.id || songId,
+			songId
+		};
+	}).filter(Boolean);
 
-    songs.forEach((song) => {
-        if (!seenSongs.has(song.id)) items.push({ type: "song", id: song.id, songId: song.id });
-    });
+	songs.forEach((song) => {
+		if (!seenSongs.has(song.id)) items.push({
+			type: "song",
+			id: song.id,
+			songId: song.id
+		});
+	});
 
-    return { songs, items };
+	return {
+		songs,
+		items
+	};
 }
 
 /* ============================================================
@@ -256,8 +310,8 @@ function swingRatio(song) {
 }
 
 function selectedSong() {
-    if (freeMode) return freeSong;
-    return activeSetlist().songs.find((song) => song.id === selectedId) || activeSetlist().songs[0] || null;
+	if (freeMode) return freeSong;
+	return activeSetlist().songs.find((song) => song.id === selectedId) || activeSetlist().songs[0] || null;
 }
 
 function effectiveTempo(song = selectedSong()) {
@@ -273,13 +327,17 @@ function tempoLabel(song) {
 }
 
 function getSong(id) {
-    return activeSetlist().songs.find((song) => song.id === id) || null;
+	return activeSetlist().songs.find((song) => song.id === id) || null;
 }
 
 function visibleSetEntries() {
-    if (sortMode === "custom") return activeSetlist().items;
-    if (!sortedViewIds.length) sortedViewIds = sortedSongIds(sortMode);
-    return sortedViewIds.map((songId) => ({ type: "song", id: songId, songId }));
+	if (sortMode === "custom") return activeSetlist().items;
+	if (!sortedViewIds.length) sortedViewIds = sortedSongIds(sortMode);
+	return sortedViewIds.map((songId) => ({
+		type: "song",
+		id: songId,
+		songId
+	}));
 }
 
 function visibleSongIds() {
@@ -289,14 +347,17 @@ function visibleSongIds() {
 }
 
 function sortedSongIds(mode) {
-    const collator = new Intl.Collator(undefined, { numeric: true, sensitivity: "base" });
-    return [...activeSetlist().songs]
-        .sort((a, b) => {
-            if (mode === "tempo") return a.tempo - b.tempo || collator.compare(a.name, b.name);
-            if (mode === "capo") return a.capo - b.capo || collator.compare(a.name, b.name);
-            return collator.compare(a.name, b.name);
-        })
-        .map((song) => song.id);
+	const collator = new Intl.Collator(undefined, {
+		numeric: true,
+		sensitivity: "base"
+	});
+	return [...activeSetlist().songs]
+		.sort((a, b) => {
+			if (mode === "tempo") return a.tempo - b.tempo || collator.compare(a.name, b.name);
+			if (mode === "capo") return a.capo - b.capo || collator.compare(a.name, b.name);
+			return collator.compare(a.name, b.name);
+		})
+		.map((song) => song.id);
 }
 
 
@@ -305,18 +366,18 @@ function sortedSongIds(mode) {
    ============================================================ */
 
 function render() {
-if (els.setlistDropdownTrigger && els.setlistDropdownOptions) {
-    els.setlistDropdownTrigger.textContent = activeSetlist().name;
-    els.setlistDropdownOptions.innerHTML = "";
-    state.setlists.forEach(sl => {
-        const li = document.createElement("li");
-        li.setAttribute("role", "option");
-        li.setAttribute("aria-selected", String(sl.id === state.activeSetlistId));
-        li.dataset.value = sl.id;
-        li.textContent = sl.name;
-        els.setlistDropdownOptions.append(li);
-    });
-}
+	if (els.setlistDropdownTrigger && els.setlistDropdownOptions) {
+		els.setlistDropdownTrigger.textContent = activeSetlist().name;
+		els.setlistDropdownOptions.innerHTML = "";
+		state.setlists.forEach(sl => {
+			const li = document.createElement("li");
+			li.setAttribute("role", "option");
+			li.setAttribute("aria-selected", String(sl.id === state.activeSetlistId));
+			li.dataset.value = sl.id;
+			li.textContent = sl.name;
+			els.setlistDropdownOptions.append(li);
+		});
+	}
 	const song = selectedSong();
 	if (!song) {
 		selectedId = null;
@@ -397,11 +458,11 @@ function renderEmptyState() {
 
 function setEditorDisabled(disabled) {
 	[
-	els.songName, els.capo, els.artist, els.length,
-	els.timeSigBeats, els.timeSigValue, els.subdivision,
-	els.doubleTime, els.notes,
-	els.tapTempo, els.playToggle,
-	els.previousSong, els.nextSong,
+		els.songName, els.capo, els.artist, els.length,
+		els.timeSigBeats, els.timeSigValue, els.subdivision,
+		els.doubleTime, els.notes,
+		els.tapTempo, els.playToggle,
+		els.previousSong, els.nextSong,
 	].forEach((control) => {
 		control.disabled = disabled;
 	});
@@ -418,17 +479,17 @@ function renderBeats(song) {
 
 	song.accents = [...validAccents].sort((a, b) => a - b);
 
-els.beatDisplay.innerHTML = "";
-beatElements = [];
+	els.beatDisplay.innerHTML = "";
+	beatElements = [];
 
-if (els.timeSigBeats && !isEditingTempo) {
-	els.timeSigBeats.value = song.beatsPerBar;
-	els.timeSigValue.value = song.beatValue;
-}
+	if (els.timeSigBeats && !isEditingTempo) {
+		els.timeSigBeats.value = song.beatsPerBar;
+		els.timeSigValue.value = song.beatValue;
+	}
 
-const numRows = song.beatsPerBar >= 8 ? 2 : 1;
-const beatsPerRow = Math.ceil(song.beatsPerBar / numRows);
-els.beatDisplay.style.gridTemplateColumns = `repeat(${beatsPerRow}, 32px)`;
+	const numRows = song.beatsPerBar >= 8 ? 2 : 1;
+	const beatsPerRow = Math.ceil(song.beatsPerBar / numRows);
+	els.beatDisplay.style.gridTemplateColumns = `repeat(${beatsPerRow}, 32px)`;
 
 	for (let index = 0; index < song.beatsPerBar; index += 1) {
 		const button = document.createElement("button");
@@ -460,7 +521,7 @@ function updateCurrentBeatDisplay() {
 	beatElements.forEach((button, index) => {
 		button.classList.toggle("current", index === currentBeat);
 	});
-	
+
 }
 
 function renderSongs(activeSong) {
@@ -551,18 +612,18 @@ function renderSongMeta(container, song) {
    ============================================================ */
 
 function updateSong(patch) {
-    if (freeMode) {
-        Object.assign(freeSong, patch);
-        render();
-        return;
-    }
-    const song = selectedSong();
-    if (!song) return;
-    Object.assign(song, patch);
-    if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
-        sortedViewIds = sortedSongIds(sortMode);
-    }
-    render();
+	if (freeMode) {
+		Object.assign(freeSong, patch);
+		render();
+		return;
+	}
+	const song = selectedSong();
+	if (!song) return;
+	Object.assign(song, patch);
+	if (sortMode !== "custom" && ("tempo" in patch || "capo" in patch || "name" in patch)) {
+		sortedViewIds = sortedSongIds(sortMode);
+	}
+	render();
 }
 
 function toggleFreeMode() {
@@ -639,7 +700,7 @@ function toggleSettings() {
 			notesPanel.hidden = false;
 			notesPanel.style.display = "";
 		}
-		
+
 		// Hide the global settings panel when toggled off
 		els.globalSettingsPanel.hidden = true;
 
@@ -684,73 +745,79 @@ function toggleAccent(beat) {
 	const song = selectedSong();
 	if (!song) return;
 	song.accents = song.accents.includes(beat) ?
-		song.accents.filter((item) => item !== beat) :
-		[...song.accents, beat].sort((a, b) => a - b);
+		song.accents.filter((item) => item !== beat) : [...song.accents, beat].sort((a, b) => a - b);
 	render();
 	saveState();
 }
 
 function addSong() {
-    const song = createSong();
-    activeSetlist().songs.push(song);
-    activeSetlist().items.push({ type: "song", id: song.id, songId: song.id });
-    sortMode = "custom";
-    sortedViewIds = [];
-    chooseSong(song.id);
+	const song = createSong();
+	activeSetlist().songs.push(song);
+	activeSetlist().items.push({
+		type: "song",
+		id: song.id,
+		songId: song.id
+	});
+	sortMode = "custom";
+	sortedViewIds = [];
+	chooseSong(song.id);
 	saveState();
 }
 
 function addDivider() {
-    if (!activeSetlist().songs.length) return;
-    activeSetlist().items.push({ type: "divider", id: crypto.randomUUID() });
-    sortMode = "custom";
-    sortedViewIds = [];
-    render();
+	if (!activeSetlist().songs.length) return;
+	activeSetlist().items.push({
+		type: "divider",
+		id: crypto.randomUUID()
+	});
+	sortMode = "custom";
+	sortedViewIds = [];
+	render();
 	saveState();
 }
 
 function deleteSong(id) {
-    const sl = activeSetlist();
-    const index = sl.songs.findIndex((song) => song.id === id);
-    sl.songs = sl.songs.filter((song) => song.id !== id);
-    sl.items = sl.items.filter((item) => item.type !== "song" || item.songId !== id);
-    sortedViewIds = sortedViewIds.filter((songId) => songId !== id);
-    if (selectedId === id) {
-        selectedId = sl.songs[Math.max(0, index - 1)]?.id || null;
-        tempSpeed = 0;
-    }
-    if (!sl.songs.length) {
-        sl.items = [];
-        stopClock();
-    }
-    render();
+	const sl = activeSetlist();
+	const index = sl.songs.findIndex((song) => song.id === id);
+	sl.songs = sl.songs.filter((song) => song.id !== id);
+	sl.items = sl.items.filter((item) => item.type !== "song" || item.songId !== id);
+	sortedViewIds = sortedViewIds.filter((songId) => songId !== id);
+	if (selectedId === id) {
+		selectedId = sl.songs[Math.max(0, index - 1)]?.id || null;
+		tempSpeed = 0;
+	}
+	if (!sl.songs.length) {
+		sl.items = [];
+		stopClock();
+	}
+	render();
 	saveState();
 }
 
 function deleteDivider(id) {
-    activeSetlist().items = activeSetlist().items.filter((item) => item.id !== id);
-    render();
+	activeSetlist().items = activeSetlist().items.filter((item) => item.id !== id);
+	render();
 	saveState();
 }
 
 function moveItem(sourceId, targetId) {
-    if (!sourceId || sourceId === targetId) return;
-    if (sortMode !== "custom") {
-        const sourceIndex = sortedViewIds.indexOf(sourceId);
-        const targetIndex = sortedViewIds.indexOf(targetId);
-        if (sourceIndex < 0 || targetIndex < 0) return;
-        const [songId] = sortedViewIds.splice(sourceIndex, 1);
-        sortedViewIds.splice(targetIndex, 0, songId);
-        render();
-        return;
-    }
-    const items = activeSetlist().items;
-    const sourceIndex = items.findIndex((item) => item.id === sourceId);
-    const targetIndex = items.findIndex((item) => item.id === targetId);
-    if (sourceIndex < 0 || targetIndex < 0) return;
-    const [item] = items.splice(sourceIndex, 1);
-    items.splice(targetIndex, 0, item);
-    render();
+	if (!sourceId || sourceId === targetId) return;
+	if (sortMode !== "custom") {
+		const sourceIndex = sortedViewIds.indexOf(sourceId);
+		const targetIndex = sortedViewIds.indexOf(targetId);
+		if (sourceIndex < 0 || targetIndex < 0) return;
+		const [songId] = sortedViewIds.splice(sourceIndex, 1);
+		sortedViewIds.splice(targetIndex, 0, songId);
+		render();
+		return;
+	}
+	const items = activeSetlist().items;
+	const sourceIndex = items.findIndex((item) => item.id === sourceId);
+	const targetIndex = items.findIndex((item) => item.id === targetId);
+	if (sourceIndex < 0 || targetIndex < 0) return;
+	const [item] = items.splice(sourceIndex, 1);
+	items.splice(targetIndex, 0, item);
+	render();
 	saveState();
 }
 
@@ -765,47 +832,62 @@ function sortSongs(mode) {
    ============================================================ */
 
 async function addSetlist() {
-    const number = state.setlists.length + 1;
-    const name = await openModal({ message: "Setlist Name:", input: true, inputDefault: `Setlist ${number}` });
-    if (!name) return;
-    const setlist = { id: crypto.randomUUID(), name, ...normalizeSetlist({}) };
-    state.setlists.push(setlist);
-    switchSetlist(setlist.id);
+	const number = state.setlists.length + 1;
+	const name = await openModal({
+		message: "Setlist Name:",
+		input: true,
+		inputDefault: `Setlist ${number}`
+	});
+	if (!name) return;
+	const setlist = {
+		id: crypto.randomUUID(),
+		name,
+		...normalizeSetlist({})
+	};
+	state.setlists.push(setlist);
+	switchSetlist(setlist.id);
 }
 
 async function deleteSetlist() {
-    if (state.setlists.length === 1) return;
-    const confirmed = await openModal({ message: `Delete '${activeSetlist().name}'?`, danger: true });
-    if (!confirmed) return;
-    const index = state.setlists.findIndex(s => s.id === state.activeSetlistId);
-    state.setlists = state.setlists.filter(s => s.id !== state.activeSetlistId);
-    state.activeSetlistId = state.setlists[Math.max(0, index - 1)].id;
-    selectedId = activeSetlist().songs[0]?.id || null;
-    sortMode = "custom";
-    sortedViewIds = [];
-    tempSpeed = 0;
-    stopClock();
-    render();
-    saveState();
+	if (state.setlists.length === 1) return;
+	const confirmed = await openModal({
+		message: `Delete '${activeSetlist().name}'?`,
+		danger: true
+	});
+	if (!confirmed) return;
+	const index = state.setlists.findIndex(s => s.id === state.activeSetlistId);
+	state.setlists = state.setlists.filter(s => s.id !== state.activeSetlistId);
+	state.activeSetlistId = state.setlists[Math.max(0, index - 1)].id;
+	selectedId = activeSetlist().songs[0]?.id || null;
+	sortMode = "custom";
+	sortedViewIds = [];
+	tempSpeed = 0;
+	stopClock();
+	render();
+	saveState();
 }
 async function renameSetlist() {
-    const sl = activeSetlist();
-    const name = await openModal({ message: "Setlist Rename:", input: true, inputDefault: sl.name });
-    if (!name || name === sl.name) return;
-    sl.name = name;
-    render();
-    saveState();
+	const sl = activeSetlist();
+	const name = await openModal({
+		message: "Setlist Rename:",
+		input: true,
+		inputDefault: sl.name
+	});
+	if (!name || name === sl.name) return;
+	sl.name = name;
+	render();
+	saveState();
 }
 
 function switchSetlist(id) {
-    if (id === state.activeSetlistId) return;
-    state.activeSetlistId = id;
-    selectedId = activeSetlist().songs[0]?.id || null;
-    sortMode = "custom";
-    sortedViewIds = [];
-    tempSpeed = 0;
-    stopClock();
-    render();
+	if (id === state.activeSetlistId) return;
+	state.activeSetlistId = id;
+	selectedId = activeSetlist().songs[0]?.id || null;
+	sortMode = "custom";
+	sortedViewIds = [];
+	tempSpeed = 0;
+	stopClock();
+	render();
 	saveState();
 }
 
@@ -814,78 +896,82 @@ function switchSetlist(id) {
    ============================================================ */
 
 function exportSongs() {
-    const sl = activeSetlist();
-    const blob = new Blob(
-        [JSON.stringify({ songs: sl.songs, items: sl.items }, null, 2)],
-        { type: "application/json" }
-    );
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = `${sl.name.toLowerCase().replace(/\s+/g, "_")}_setlist.json`;
-    link.click();
-    URL.revokeObjectURL(link.href);
+	const sl = activeSetlist();
+	const blob = new Blob(
+		[JSON.stringify({
+			songs: sl.songs,
+			items: sl.items
+		}, null, 2)], {
+			type: "application/json"
+		}
+	);
+	const link = document.createElement("a");
+	link.href = URL.createObjectURL(blob);
+	link.download = `${sl.name.toLowerCase().replace(/\s+/g, "_")}_setlist.json`;
+	link.click();
+	URL.revokeObjectURL(link.href);
 }
 
 async function replaceSongs(file) {
-    try {
-        const imported = normalizeSetlist(JSON.parse(await file.text()));
-        const baseName = file.name.split(/[_\-.]/)[0];
-        const capitalized = baseName.charAt(0).toUpperCase() + baseName.slice(1).toLowerCase();
+	try {
+		const imported = normalizeSetlist(JSON.parse(await file.text()));
+		const baseName = file.name.split(/[_\-.]/)[0];
+		const capitalized = baseName.charAt(0).toUpperCase() + baseName.slice(1).toLowerCase();
 
-        function uniqueName(name) {
-            const existing = new Set(state.setlists.map(s => s.name));
-            if (!existing.has(name)) return name;
-            let i = 2;
-            while (existing.has(`${name} ${i}`)) i++;
-            return `${name} ${i}`;
-        }
+		function uniqueName(name) {
+			const existing = new Set(state.setlists.map(s => s.name));
+			if (!existing.has(name)) return name;
+			let i = 2;
+			while (existing.has(`${name} ${i}`)) i++;
+			return `${name} ${i}`;
+		}
 
-        const sl = activeSetlist();
-        const isEmpty = sl.songs.length === 0;
+		const sl = activeSetlist();
+		const isEmpty = sl.songs.length === 0;
 
-        if (isEmpty) {
-            sl.songs = imported.songs;
-            sl.items = imported.items;
-            sl.name = uniqueName(capitalized);
-            selectedId = imported.songs[0]?.id || null;
-        } else {
-            const newSetlist = {
-                id: crypto.randomUUID(),
-                name: uniqueName(capitalized),
-                ...imported
-            };
-            state.setlists.push(newSetlist);
-            state.activeSetlistId = newSetlist.id;
-            selectedId = imported.songs[0]?.id || null;
-        }
+		if (isEmpty) {
+			sl.songs = imported.songs;
+			sl.items = imported.items;
+			sl.name = uniqueName(capitalized);
+			selectedId = imported.songs[0]?.id || null;
+		} else {
+			const newSetlist = {
+				id: crypto.randomUUID(),
+				name: uniqueName(capitalized),
+				...imported
+			};
+			state.setlists.push(newSetlist);
+			state.activeSetlistId = newSetlist.id;
+			selectedId = imported.songs[0]?.id || null;
+		}
 
-        sortMode = "custom";
-        sortedViewIds = [];
-        tempSpeed = 0;
-        stopClock();
-        render();
-    } catch {
-        alert("Failed to import file.");
-    }
-    saveState();
+		sortMode = "custom";
+		sortedViewIds = [];
+		tempSpeed = 0;
+		stopClock();
+		render();
+	} catch {
+		alert("Failed to import file.");
+	}
+	saveState();
 }
 
 async function mergeSongs(file) {
-    try {
-        const imported = normalizeSetlist(JSON.parse(await file.text()));
-        const sl = activeSetlist();
-        const existingIds = new Set(sl.songs.map((s) => s.id));
-        const existingItemSongIds = new Set(sl.items.filter((i) => i.type === "song").map((i) => i.songId));
-        sl.songs.push(...imported.songs.filter((s) => !existingIds.has(s.id)));
-        sl.items.push(...imported.items.filter(
-            (i) => i.type === "divider" || !existingItemSongIds.has(i.songId)
-        ));
-        sortMode = "custom";
-        sortedViewIds = [];
-        render();
-    } catch {
-        alert("Failed to import file.");
-    }
+	try {
+		const imported = normalizeSetlist(JSON.parse(await file.text()));
+		const sl = activeSetlist();
+		const existingIds = new Set(sl.songs.map((s) => s.id));
+		const existingItemSongIds = new Set(sl.items.filter((i) => i.type === "song").map((i) => i.songId));
+		sl.songs.push(...imported.songs.filter((s) => !existingIds.has(s.id)));
+		sl.items.push(...imported.items.filter(
+			(i) => i.type === "divider" || !existingItemSongIds.has(i.songId)
+		));
+		sortMode = "custom";
+		sortedViewIds = [];
+		render();
+	} catch {
+		alert("Failed to import file.");
+	}
 	saveState();
 }
 
@@ -1015,18 +1101,18 @@ const notesPanel = document.querySelector("[data-panel='notes']");
 
 function initTabs() {
 	document.querySelectorAll(".panel-tab").forEach((tab) => {
-tab.addEventListener("click", () => {
-	if (settingsOpen) return;
+		tab.addEventListener("click", () => {
+			if (settingsOpen) return;
 
-	document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
-	tab.classList.add("active");
-	applyTab(tab.dataset.tab);
+			document.querySelectorAll(".panel-tab").forEach((t) => t.classList.remove("active"));
+			tab.classList.add("active");
+			applyTab(tab.dataset.tab);
 
-	if (tab.dataset.tab === "control") {
-		const song = selectedSong();
-		if (song) renderBeats(song);
-	}
-});
+			if (tab.dataset.tab === "control") {
+				const song = selectedSong();
+				if (song) renderBeats(song);
+			}
+		});
 	});
 }
 
@@ -1159,16 +1245,22 @@ els.gDefaultAccent.addEventListener("click", () => {
 });
 
 els.songName.addEventListener("input", (event) =>
-	updateSong({ name: event.target.value })
+	updateSong({
+		name: event.target.value
+	})
 );
 
 els.songName.addEventListener("blur", (event) => {
-	if (!event.target.value.trim()) updateSong({ name: "Untitled Song" });
+	if (!event.target.value.trim()) updateSong({
+		name: "Untitled Song"
+	});
 	saveState();
 });
 
 els.artist.addEventListener("input", (event) =>
-	updateSong({ artist: event.target.value })
+	updateSong({
+		artist: event.target.value
+	})
 );
 els.artist.addEventListener("blur", () => saveState());
 
@@ -1181,7 +1273,9 @@ els.length.addEventListener("input", (event) => {
 	}
 });
 els.length.addEventListener("blur", () => {
-	updateSong({ length: els.length.value });
+	updateSong({
+		length: els.length.value
+	});
 	saveState();
 });
 
@@ -1219,7 +1313,9 @@ els.tempoValue.addEventListener("input", (event) => {
 	if (isPlaying) return;
 	const tempo = parseInt(event.target.textContent, 10);
 	if (!Number.isFinite(tempo) || tempo < 1) return;
-	updateSong({ tempo: clamp(tempo, 1, 400) });
+	updateSong({
+		tempo: clamp(tempo, 1, 400)
+	});
 });
 els.tempoValue.addEventListener("keydown", (event) => {
 	if (event.key === "Enter") {
@@ -1229,7 +1325,10 @@ els.tempoValue.addEventListener("keydown", (event) => {
 	}
 	const allowed = ["Backspace", "Delete", "ArrowLeft", "ArrowRight", "Tab"];
 	if (allowed.includes(event.key)) return;
-	if (!/^\d$/.test(event.key)) { event.preventDefault(); return; }
+	if (!/^\d$/.test(event.key)) {
+		event.preventDefault();
+		return;
+	}
 	if (event.target.textContent.replace(/\D/g, "").length >= 3) event.preventDefault();
 });
 els.tempoValue.addEventListener("focus", () => {
@@ -1283,12 +1382,14 @@ els.notes.addEventListener("input", (event) => updateSong({
 }));
 
 document.querySelectorAll(".nudge-btn").forEach((button) => {
-    button.addEventListener("click", () => {
-        const song = selectedSong();
-        if (!song) return;
-        updateSong({ tempo: clamp(song.tempo + Number(button.dataset.nudge), 1, 400) });
-        saveState();
-    });
+	button.addEventListener("click", () => {
+		const song = selectedSong();
+		if (!song) return;
+		updateSong({
+			tempo: clamp(song.tempo + Number(button.dataset.nudge), 1, 400)
+		});
+		saveState();
+	});
 });
 
 
@@ -1353,35 +1454,44 @@ els.addSong.addEventListener("click", addSong);
 document.querySelector("#addSongControl").addEventListener("click", addSong);
 els.addDivider.addEventListener("click", addDivider);
 els.songsList.addEventListener("dragstart", (event) => {
-    const row = event.target.closest("[data-item-id]");
-    if (!row) return;
-    draggedItemId = row.dataset.itemId;
-    row.classList.add("dragging");
-    event.dataTransfer.effectAllowed = "move";
+	const row = event.target.closest("[data-item-id]");
+	if (!row) return;
+	draggedItemId = row.dataset.itemId;
+	row.classList.add("dragging");
+	event.dataTransfer.effectAllowed = "move";
 });
 els.songsList.addEventListener("dragend", (event) => {
-    const row = event.target.closest("[data-item-id]");
-    if (!row) return;
-    draggedItemId = null;
-    row.classList.remove("dragging");
+	const row = event.target.closest("[data-item-id]");
+	if (!row) return;
+	draggedItemId = null;
+	row.classList.remove("dragging");
 });
 els.songsList.addEventListener("dragover", (event) => {
-    event.preventDefault();
-    event.dataTransfer.dropEffect = "move";
+	event.preventDefault();
+	event.dataTransfer.dropEffect = "move";
 });
 els.songsList.addEventListener("drop", (event) => {
-    event.preventDefault();
-    const row = event.target.closest("[data-item-id]");
-    if (!row) return;
-    moveItem(draggedItemId, row.dataset.itemId);
+	event.preventDefault();
+	const row = event.target.closest("[data-item-id]");
+	if (!row) return;
+	moveItem(draggedItemId, row.dataset.itemId);
 });
 els.songsList.addEventListener("click", (event) => {
-    const selectBtn = event.target.closest("[data-action='select']");
-    if (selectBtn) { chooseSong(selectBtn.dataset.songId); return; }
-    const deleteSongBtn = event.target.closest("[data-action='delete-song']");
-    if (deleteSongBtn) { deleteSong(deleteSongBtn.dataset.songId); return; }
-    const deleteDivBtn = event.target.closest("[data-action='delete-divider']");
-    if (deleteDivBtn) { deleteDivider(deleteDivBtn.dataset.itemId); return; }
+	const selectBtn = event.target.closest("[data-action='select']");
+	if (selectBtn) {
+		chooseSong(selectBtn.dataset.songId);
+		return;
+	}
+	const deleteSongBtn = event.target.closest("[data-action='delete-song']");
+	if (deleteSongBtn) {
+		deleteSong(deleteSongBtn.dataset.songId);
+		return;
+	}
+	const deleteDivBtn = event.target.closest("[data-action='delete-divider']");
+	if (deleteDivBtn) {
+		deleteDivider(deleteDivBtn.dataset.itemId);
+		return;
+	}
 });
 
 els.exportSongs.addEventListener("click", exportSongs);
@@ -1400,19 +1510,22 @@ els.importFile.addEventListener("change", (event) => {
 });
 
 els.clearSongs.addEventListener("click", async () => {
-    const confirmed = await openModal({ message: "Clear Setlist?", danger: true });
-    if (!confirmed) return;
-    const sl = activeSetlist();
-    const fresh = normalizeSetlist({});
-    sl.songs = fresh.songs;
-    sl.items = fresh.items;
-    sl.selectedId = fresh.selectedId;
-    selectedId = null;
-    sortMode = "custom";
-    sortedViewIds = [];
-    tempSpeed = 0;
-    stopClock();
-    render();
+	const confirmed = await openModal({
+		message: "Clear Setlist?",
+		danger: true
+	});
+	if (!confirmed) return;
+	const sl = activeSetlist();
+	const fresh = normalizeSetlist({});
+	sl.songs = fresh.songs;
+	sl.items = fresh.items;
+	sl.selectedId = fresh.selectedId;
+	selectedId = null;
+	sortMode = "custom";
+	sortedViewIds = [];
+	tempSpeed = 0;
+	stopClock();
+	render();
 });
 
 document.querySelectorAll("[data-sort]").forEach((button) =>
@@ -1423,26 +1536,26 @@ document.querySelector("#addSetlist").addEventListener("click", addSetlist);
 document.querySelector("#renameSetlist").addEventListener("click", renameSetlist);
 document.querySelector("#deleteSetlist").addEventListener("click", deleteSetlist);
 els.setlistDropdownTrigger.addEventListener("click", (event) => {
-    event.stopPropagation();
-    const opening = els.setlistDropdownOptions.hidden;
-    els.setlistDropdownOptions.hidden = !opening;
-    els.setlistDropdownTrigger.setAttribute("aria-expanded", String(opening));
+	event.stopPropagation();
+	const opening = els.setlistDropdownOptions.hidden;
+	els.setlistDropdownOptions.hidden = !opening;
+	els.setlistDropdownTrigger.setAttribute("aria-expanded", String(opening));
 });
 
 els.setlistDropdownOptions.addEventListener("click", (event) => {
-    const li = event.target.closest("li[data-value]");
-    if (!li) return;
-    els.setlistDropdownOptions.hidden = true;
-    els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
-    switchSetlist(li.dataset.value);
+	const li = event.target.closest("li[data-value]");
+	if (!li) return;
+	els.setlistDropdownOptions.hidden = true;
+	els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
+	switchSetlist(li.dataset.value);
 });
 
 document.addEventListener("click", (event) => {
-    if (els.setlistDropdownOptions.hidden) return;
-    if (els.setlistDropdownTrigger.contains(event.target) ||
-        els.setlistDropdownOptions.contains(event.target)) return;
-    els.setlistDropdownOptions.hidden = true;
-    els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
+	if (els.setlistDropdownOptions.hidden) return;
+	if (els.setlistDropdownTrigger.contains(event.target) ||
+		els.setlistDropdownOptions.contains(event.target)) return;
+	els.setlistDropdownOptions.hidden = true;
+	els.setlistDropdownTrigger.setAttribute("aria-expanded", "false");
 });
 
 /* ============================================================
@@ -1520,7 +1633,9 @@ window.addEventListener("resize", () => {
 
 if ("serviceWorker" in navigator) {
 	window.addEventListener("load", () => {
-		navigator.serviceWorker.register("./sw.js", { updateViaCache: "none" }).catch(() => {});
+		navigator.serviceWorker.register("./sw.js", {
+			updateViaCache: "none"
+		}).catch(() => {});
 	});
 }
 
@@ -1530,7 +1645,12 @@ if ("serviceWorker" in navigator) {
 
 let modalResolve = null;
 
-function openModal({ message, input = false, inputDefault = "", danger = false }) {
+function openModal({
+	message,
+	input = false,
+	inputDefault = "",
+	danger = false
+}) {
 	return new Promise((resolve) => {
 		modalResolve = resolve;
 		els.modalMessage.textContent = message;
@@ -1544,19 +1664,28 @@ function openModal({ message, input = false, inputDefault = "", danger = false }
 
 els.modalCancel.addEventListener("click", () => {
 	els.customModal.hidden = true;
-	if (modalResolve) { modalResolve(null); modalResolve = null; }
+	if (modalResolve) {
+		modalResolve(null);
+		modalResolve = null;
+	}
 });
 
 els.modalConfirm.addEventListener("click", () => {
 	const value = els.modalInput.hidden ? true : els.modalInput.value.trim();
 	els.customModal.hidden = true;
-	if (modalResolve) { modalResolve(value || null); modalResolve = null; }
+	if (modalResolve) {
+		modalResolve(value || null);
+		modalResolve = null;
+	}
 });
 
 els.customModal.addEventListener("click", (event) => {
 	if (event.target === els.customModal) {
 		els.customModal.hidden = true;
-		if (modalResolve) { modalResolve(null); modalResolve = null; }
+		if (modalResolve) {
+			modalResolve(null);
+			modalResolve = null;
+		}
 	}
 });
 
