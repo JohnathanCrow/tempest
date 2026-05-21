@@ -31,6 +31,13 @@
    RESET & BASE
    ============================================================ */
 
+
+/* Add this rule at the top of your base styles to lock scaling */
+html {
+	font-size: 14px !important;
+	-webkit-text-size-adjust: 100% !important;
+	text-size-adjust: 100% !important;
+}
 * {
 	box-sizing: border-box;
 }
@@ -1226,7 +1233,7 @@ label span,
    ============================================================ */
 @media (max-height: 750px) {
 	.song-header {
-		min-height: 50px;
+		min-height: 10px;
 	}
 
 	.song-name,
@@ -1238,6 +1245,7 @@ label span,
 
 	.sticky-console {
 		gap: 4px;
+		padding: 2px;
 	}
 
 	.live-grid {
@@ -1245,11 +1253,11 @@ label span,
 	}
 
 	.practice-speed {
-		margin-top: 18px;
+		margin-top: 16px;
 	}
 
 	.transport {
-		margin-top: 4px;
+		margin-top: 0px;
 	}
 
 	.beat {
@@ -1263,15 +1271,31 @@ label span,
 	}
 
 	.settings-grid {
-		gap: 4px 8px;
+		gap: 1px 8px;
 	}
 	
 	.tempo-nudge-layout {
-		height: 130px;
+		height: 90px;
 	}
 	.tempo-column {
-		height: 160px;
+		height: 125px;
 		overflow: hidden;
 
 	}
+	
+	.tempo-value {
+        margin-bottom: 10px;
+        text-align: center;
+        font-size: 8rem;
+        line-height: 1;
+    }
+	.nudge-btn {
+        font-size: 8px !important;
+		height: 24px;
+    }
+	
+	.settings-actions {
+    grid-template-rows: 14px 25px;
+}
+	
 }
