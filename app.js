@@ -59,6 +59,7 @@ const DEFAULT_FREE_SONG = { id: "free", name: "Basic Mode", tempo: 100, artist: 
 const SCHEDULE_AHEAD_SECONDS = 0.12;
 const SCHEDULER_INTERVAL_MS = 25;
 
+let globalSettings = loadGlobalSettings();
 let state = loadState();
 let selectedId = activeSetlist().songs[0]?.id || null;
 let sortMode = "custom";
@@ -69,7 +70,7 @@ let freeSong = loadFreeSong();
 let freeMode = localStorage.getItem(FREE_MODE_KEY) === "true";
 let flashEnabled = localStorage.getItem(FLASH_KEY) === "true";
 let settingsOpen = false;
-let globalSettings = loadGlobalSettings();
+
 
 
 
